@@ -38,7 +38,7 @@
     <nav id="menu-navegacao"></nav>
     <div class="intro-container">
         <h2 id="txt-boas-vindas">Bem-vindo ao nosso Catálogo Virtual</h2>
-        <p id="txt-descricao">Carregando catálogo...</p>
+        <p id="txt-descricao">Navegue pelas nossas abas para conhecer nossos produtos.</p>
     </div>
     <div class="vitrine" id="vitrine-produtos"></div>
 
@@ -47,22 +47,13 @@
         let carrinho = JSON.parse(localStorage.getItem('carrinho_itens')) || [];
 
         window.onload = async function() {
-            await carregarConfiguracoes();
             await carregarAbasEMenu();
             await carregarProdutosVitrine();
             atualizarContador();
         }
 
-        async function carregarConfiguracoes() {
-            let r = await fetch('/api/config'), d = await r.json();
-            if(d) {
-                document.getElementById('txt-titulo-loja').innerText = d.titulo || "Ary Art";
-                document.getElementById('txt-descricao').innerText = d.subtitulo || "";
-            }
-        }
-
         async function carregarAbasEMenu() {
-            let r = await fetch('/api/abas'), abas = await r.json();
+            let r = await fetch('/api/categorias'), abas = await r.json();
             let menu = document.getElementById('menu-navegacao');
             menu.innerHTML = "";
 
@@ -73,8 +64,8 @@
 
             if(abas) {
                 abas.forEach(aba => {
-                    let link = document.createElement('a'); link.innerText = aba;
-                    link.onclick = function() { removerAtivos(); link.className = "active"; mostrarProdutos(aba); };
+                    let link = document.createElement('a'); link.innerText = aba.nome;
+                    link.onclick = function() { removerAtivos(); link.className = "active"; mostrarProdutos(aba.id); };
                     menu.appendChild(link);
                 });
             }
@@ -90,9 +81,9 @@
             mostrarProdutos("Todos");
         }
 
-        function mostrarProdutos(categoria) {
+        function mostrarProdutos(categoriaId) {
             let vitrine = document.getElementById('vitrine-produtos'); vitrine.innerHTML = "";
-            let filtrados = categoria === "Todos" ? produtosSalvos : produtosSalvos.filter(p => p.aba === categoria);
+            let filtrados = categoriaId === "Todos" ? produtosSalvos : produtosSalvos.filter(p => p.categoria_id == categoriaId);
 
             if(!filtrados || filtrados.length === 0) {
                 vitrine.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#999; font-style:italic;">Nenhum produto cadastrado aqui.</p>`;
@@ -101,9 +92,9 @@
 
             filtrados.forEach((prod, pIdx) => {
                 let card = document.createElement('div'); card.className = "produto-card";
-                let imagens = prod.imgs ? (typeof prod.imgs === 'string' ? prod.imgs.split(',') : prod.imgs) : ['images/logo.png'];
+                let imagens = (prod.imagens && prod.imagens.length > 0) ? prod.imagens : ['images/logo.png'];
                 let tagsImagens = imagens.map((img, iIdx) => `<img src="${img.trim()}" class="img-carrossel-${pIdx} ${iIdx === 0 ? 'active' : ''}" onerror="this.src='images/logo.png'">`).join('');
-                let setas = imagens.length > 1 ? `<button class="seta-carrossel seta-esq" onclick="mudarFoto(${pIdx}, -1, ${imagens.length})">&#10094;</button><button class="seta-carrossel seta-dir" onclick="mudarFoto(${pIdx}, 1, ${imagens.length})">&#10095;</button>` : '';
+                let setas = imagens.length > 1 ? `<button class="seta-carrossel seta-esq" onclick="mudarFoto(${pIdx}, -1, ${imagens.length})">❮</button><button class="seta-carrossel seta-dir" onclick="mudarFoto(${pIdx}, 1, ${imagens.length})">❯</button>` : '';
 
                 card.innerHTML = `<div class="carrossel-container">${tagsImagens}${setas}</div><div class="produto-info"><h3>${prod.nome}</h3><div class="preco">R$ ${parseFloat(prod.preco).toFixed(2)}</div><button class="btn-carrinho" onclick="addCarrinho('${prod.nome}', ${prod.preco})">🛒 Adicionar ao Carrinho</button></div>`;
                 vitrine.appendChild(card);
@@ -118,11 +109,11 @@
 
         function addCarrinho(nome, preco) {
             let item = carrinho.find(i => i.nome === nome);
-            if(item) item.quantidade += 1; else carrinho.push({ nome: nome, preco: parseFloat(preco), quantidade: 1 });
+            if(item) item.quantidade += 1; else carrinho.push({ nome: nome, preco: parseFloat(preco), quantity: 1 });
             localStorage.setItem('carrinho_itens', JSON.stringify(carrinho)); atualizarContador(); alert(`✅ ${nome} no carrinho!`);
         }
 
-        function atualizarContador() { document.getElementById('contador-carrinho').innerText = `🛒 Carrinho (${carrinho.reduce((s, i) => s + i.quantidade, 0)})`; }
+        function atualizarContador() { document.getElementById('contador-carrinho').innerText = `🛒 Carrinho (${carrinho.reduce((s, i) => s + (i.quantidade || 1), 0)})`; }
     </script>
 </body>
 </html>

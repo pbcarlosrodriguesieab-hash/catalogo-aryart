@@ -19,7 +19,7 @@
         input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
         button { background-color: #0056b3; color: white; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; transition: background 0.3s; margin-top: 10px; }
         button:hover { background-color: #ff7300; }
-        .btn-danger { background-color: #dc3545; width: auto; padding: 5px 10px; font-size: 12px; margin: 0; }
+        .btn-danger { background-color: #dc3545; width: auto; padding: 5px 10px; font-size: 12px; margin: 0; border: none; color: white; border-radius: 4px; cursor: pointer; }
         .btn-danger:hover { background-color: #bd2130; }
         .alerta { background-color: #d4edda; color: #155724; padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; font-weight: bold; display: none; }
         .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
@@ -38,7 +38,9 @@
     </header>
     <div class="admin-container">
         <div id="mensagem-salvo" class="alerta">✅ Operação realizada com sucesso!</div>
-        <div class="box">
+        
+        <!-- Bloco Ocultado temporariamente caso seu server.js não use a rota de config global -->
+        <div class="box" style="display: none;">
             <h2>⚙️ Configurações Gerais (Banco de Dados)</h2>
             <form id="form-admin">
                 <div class="form-group"><label for="admin-whatsapp">WhatsApp de Atendimento:</label><input type="text" id="admin-whatsapp" placeholder="Ex: 5511999999999"></div>
@@ -47,6 +49,7 @@
                 <button type="submit">Salvar Alterações</button>
             </form>
         </div>
+
         <div class="box">
             <h2>🗂️ Criar Novas Abas e Subpáginas</h2>
             <form id="form-abas">
@@ -55,6 +58,7 @@
             <h3 style="font-size: 14px; margin-top: 20px;">Abas Ativas no Menu:</h3>
             <div id="lista-abas"></div>
         </div>
+
         <div class="box">
             <h2>🎁 Adicionar Produtos nas Abas</h2>
             <form id="form-produtos">
@@ -68,60 +72,90 @@
             <div id="lista-produtos"></div>
         </div>
     </div>
+
     <script>
-        window.onload = async function() { await cConfig(); await cAbas(); await cProds(); }
-        async function cConfig() {
-            let r = await fetch('/api/config'), d = await r.json();
-            if(d) { document.getElementById('admin-whatsapp').value = d.whatsapp || ""; document.getElementById('admin-titulo-home').value = d.titulo || ""; document.getElementById('admin-subtitulo-home').value = d.subtitulo || ""; }
+        window.onload = async function() { 
+            await cAbas(); 
+            await cProds(); 
         }
-        document.getElementById('form-admin').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            let config = { whatsapp: document.getElementById('admin-whatsapp').value, titulo: document.getElementById('admin-titulo-home').value, subtitulo: document.getElementById('admin-subtitulo-home').value };
-            await fetch('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(config) });
-            mostrarAviso();
-        });
+
+        function mostrarAviso() {
+            let aviso = document.getElementById('mensagem-salvo');
+            aviso.style.display = 'block';
+            setTimeout(() => { aviso.style.display = 'none'; }, 3000);
+        }
+
+        // --- SISTEMA DE CATEGORIAS / ABAS ---
         document.getElementById('form-abas').addEventListener('submit', async function(e) {
             e.preventDefault(); 
             let input = document.getElementById('nome-aba'), nomeAba = input.value.trim();
             if(nomeAba) {
-                await fetch('/api/abas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: nomeAba }) });
-                input.value = ""; await cAbas(); mostrarAviso();
+                await fetch('/api/categorias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: nomeAba }) });
+                input.value = ""; 
+                await cAbas(); 
+                mostrarAviso();
             }
         });
+
         async function cAbas() {
-            let r = await fetch('/api/abas'), abas = await r.json();
+            let r = await fetch('/api/categorias'), abas = await r.json();
             let lista = document.getElementById('lista-abas'), seletor = document.getElementById('prod-aba');
-            lista.innerHTML = ""; seletor.innerHTML = '<option value="">-- Selecione uma aba --</option>';
-            ["Início", "Fazer Pedido"].forEach(b => {
-                let d = document.createElement('div'); d.className = "item-lista"; d.innerHTML = `<span>📂 <b>${b}</b> (Padrão)</span>`; lista.appendChild(d);
-                let o = document.createElement('option'); o.value = b; o.textContent = b; seletor.appendChild(o);
-            });
+            lista.innerHTML = ""; 
+            seletor.innerHTML = '<option value="">-- Selecione uma aba --</option>';
+            
             if(abas) {
                 abas.forEach(a => {
-                    let d = document.createElement('div'); d.className = "item-lista"; d.innerHTML = `<span>📂 <b>${a}</b></span> <button class="btn-danger" onclick="rAba('${a}')">Excluir</button>`; lista.appendChild(d);
-                    let o = document.createElement('option'); o.value = a; o.textContent = a; seletor.appendChild(o);
+                    let d = document.createElement('div'); 
+                    d.className = "item-lista"; 
+                    d.innerHTML = `<span>📂 <b>${a.nome}</b></span>`; 
+                    lista.appendChild(d);
+                    
+                    let o = document.createElement('option'); 
+                    o.value = a.id; 
+                    o.textContent = a.nome; 
+                    seletor.appendChild(o);
                 });
             }
         }
-        async function rAba(n) { if(confirm(`Excluir "${n}"?`)) { await fetch(`/api/abas/${encodeURIComponent(n)}`, { method: 'DELETE' }); await cAbas(); } }
+
+        // --- SISTEMA DE PRODUTOS ---
         document.getElementById('form-produtos').addEventListener('submit', async function(e) {
             e.preventDefault();
-            let p = { nome: document.getElementById('prod-nome').value, aba: document.getElementById('prod-aba').value, preco: document.getElementById('prod-preco').value, imgs: document.getElementById('prod-img').value || 'images/logo.png' };
-            await fetch('/api/produtos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p) });
-            document.getElementById('prod-nome').value = ""; document.getElementById('prod-preco').value = ""; document.getElementById('prod-img').value = "";
-            await cProds(); mostrarAviso();
+            let listaImagens = document.getElementById('prod-img').value.split(',').map(img => img.trim()).filter(img => img !== "");
+            if(listaImagens.length === 0) listaImagens.push('images/logo.png');
+
+            let p = { 
+                nome: document.getElementById('prod-nome').value, 
+                categoria_id: document.getElementById('prod-aba').value, 
+                preco: parseFloat(document.getElementById('prod-preco').value.replace(',', '.')), 
+                imagens: listaImagens,
+                descricao: ""
+            };
+
+            await fetch('/api/produtos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(p)
+            });
+
+            document.getElementById('form-produtos').reset();
+            await cProds(); 
+            mostrarAviso();
         });
+
         async function cProds() {
             let r = await fetch('/api/produtos'), prods = await r.json();
-            let lista = document.getElementById('lista-produtos'); lista.innerHTML = "";
+            let lista = document.getElementById('lista-produtos');
+            lista.innerHTML = "";
             if(prods) {
                 prods.forEach(p => {
-                    let d = document.createElement('div'); d.className = "item-lista"; d.innerHTML = `<span>🛍️ <b>${p.nome}</b> em <i>${p.aba}</i> - R$ ${parseFloat(p.preco).toFixed(2)}</span> <button class="btn-danger" onclick="rProd(${p.id})">Excluir</button>`; lista.appendChild(d);
+                    let d = document.createElement('div');
+                    d.className = "item-lista";
+                    d.innerHTML = `<span>🎁 <b>${p.nome}</b> - R$ ${p.preco.toFixed(2)}</span>`;
+                    lista.appendChild(d);
                 });
             }
         }
-        async function rProd(id) { if(confirm("Excluir produto?")) { await fetch(`/api/produtos/${id}`, { method: 'DELETE' }); await cProds(); } }
-        function mostrarAviso() { let av = document.getElementById('mensagem-salvo'); av.style.display = 'block'; setTimeout(() => { av.style.display = 'none'; }, 3000); }
     </script>
 </body>
 </html>
