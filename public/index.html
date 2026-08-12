@@ -37,8 +37,8 @@
     </header>
     <nav id="menu-navegacao"></nav>
     <div class="intro-container">
-        <h2 id="txt-boas-vindas">Bem-vindo ao nosso Catálogo Virtual</h2>
-        <p id="txt-descricao">Navegue pelas nossas abas para conhecer nossos produtos.</p>
+        <h2>Bem-vindo ao nosso Catálogo Virtual</h2>
+        <p>Navegue pelas abas abaixo para conferir as categorias exclusivas.</p>
     </div>
     <div class="vitrine" id="vitrine-produtos"></div>
 
@@ -109,11 +109,11 @@
 
         function addCarrinho(nome, preco) {
             let item = carrinho.find(i => i.nome === nome);
-            if(item) item.quantidade += 1; else carrinho.push({ nome: nome, preco: parseFloat(preco), quantity: 1 });
-            localStorage.setItem('carrinho_itens', JSON.stringify(carrinho)); atualizarContador(); alert(`✅ ${nome} no carrinho!`);
+            if(item) item.quantidade += 1; else carrinho.push({ nome: nome, preco: parseFloat(preco), quantidade: 1 });
+            localStorage.setItem('carrinho_itens', JSON.stringify(carrinho)); atualizarContador(); alert(`✅ ${nome} adicionado!`);
         }
 
-        function atualizarContador() { document.getElementById('contador-carrinho').innerText = `🛒 Carrinho (${carrinho.reduce((s, i) => s + (i.quantidade || 1), 0)})`; }
+        function atualizarContador() { document.getElementById('contador-carrinho').innerText = `🛒 Carrinho (${carrinho.reduce((s, i) => s + i.quantidade, 0)})`; }
     </script>
 </body>
 </html>
