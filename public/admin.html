@@ -39,21 +39,13 @@
     <div class="admin-container">
         <div id="mensagem-salvo" class="alerta">✅ Operação realizada com sucesso!</div>
         
-        <!-- Bloco Ocultado temporariamente caso seu server.js não use a rota de config global -->
-        <div class="box" style="display: none;">
-            <h2>⚙️ Configurações Gerais (Banco de Dados)</h2>
-            <form id="form-admin">
-                <div class="form-group"><label for="admin-whatsapp">WhatsApp de Atendimento:</label><input type="text" id="admin-whatsapp" placeholder="Ex: 5511999999999"></div>
-                <div class="form-group"><label for="admin-titulo-home">Título Principal:</label><input type="text" id="admin-titulo-home"></div>
-                <div class="form-group"><label for="admin-subtitulo-home">Texto/Subtítulo:</label><textarea id="admin-subtitulo-home" rows="3"></textarea></div>
-                <button type="submit">Salvar Alterações</button>
-            </form>
-        </div>
-
         <div class="box">
             <h2>🗂️ Criar Novas Abas e Subpáginas</h2>
             <form id="form-abas">
-                <div style="display: flex; gap: 10px;"><input type="text" id="nome-aba" placeholder="Ex: Canecas" required><button type="submit" style="width: auto; margin: 0; white-space: nowrap;">+ Criar Aba</button></div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="nome-aba" placeholder="Ex: Canecas" required>
+                    <button type="submit" style="width: auto; margin: 0; white-space: nowrap;">+ Criar Aba</button>
+                </div>
             </form>
             <h3 style="font-size: 14px; margin-top: 20px;">Abas Ativas no Menu:</h3>
             <div id="lista-abas"></div>
@@ -63,8 +55,8 @@
             <h2>🎁 Adicionar Produtos nas Abas</h2>
             <form id="form-produtos">
                 <div class="form-group"><label for="prod-nome">Nome do Produto:</label><input type="text" id="prod-nome" required></div>
-                <div class="form-group"><label for="prod-aba">Escolha a Aba:</label><select id="prod-aba" required><option value="">-- Carregando categorias... --</option></select></div>
-                <div class="form-group"><label for="prod-preco">Preço (R$):</label><input type="text" id="prod-preco" required></div>
+                <div class="form-group"><label for="prod-aba">Escolha a Aba:</label><select id="prod-aba" required><option value="">-- Carregando abas... --</option></select></div>
+                <div class="form-group"><label for="prod-preco">Preço (R$):</label><input type="text" id="prod-preco" placeholder="Ex: 35.00" required></div>
                 <div class="form-group"><label for="prod-img">Links das Fotos (Separadas por VÍRGULA):</label><textarea id="prod-img" rows="3" placeholder="Ex: images/foto1.jpg, images/foto2.jpg"></textarea></div>
                 <button type="submit">Cadastrar Produto</button>
             </form>
@@ -85,12 +77,15 @@
             setTimeout(() => { aviso.style.display = 'none'; }, 3000);
         }
 
-        // --- SISTEMA DE CATEGORIAS / ABAS ---
         document.getElementById('form-abas').addEventListener('submit', async function(e) {
             e.preventDefault(); 
             let input = document.getElementById('nome-aba'), nomeAba = input.value.trim();
             if(nomeAba) {
-                await fetch('/api/categorias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: nomeAba }) });
+                await fetch('/api/categorias', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ nome: nomeAba }) 
+                });
                 input.value = ""; 
                 await cAbas(); 
                 mostrarAviso();
@@ -118,15 +113,15 @@
             }
         }
 
-        // --- SISTEMA DE PRODUTOS ---
         document.getElementById('form-produtos').addEventListener('submit', async function(e) {
             e.preventDefault();
-            let listaImagens = document.getElementById('prod-img').value.split(',').map(img => img.trim()).filter(img => img !== "");
+            let linkTexto = document.getElementById('prod-img').value;
+            let listaImagens = linkTexto.split(',').map(img => img.trim()).filter(img => img !== "");
             if(listaImagens.length === 0) listaImagens.push('images/logo.png');
 
             let p = { 
                 nome: document.getElementById('prod-nome').value, 
-                categoria_id: document.getElementById('prod-aba').value, 
+                categoria_id: parseInt(document.getElementById('prod-aba').value), 
                 preco: parseFloat(document.getElementById('prod-preco').value.replace(',', '.')), 
                 imagens: listaImagens,
                 descricao: ""
