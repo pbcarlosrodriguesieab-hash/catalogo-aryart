@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ary Art - Catálogo de Sublimação</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f6f9; color: #1a1e21; }
+        header { background-color: #ffffff; padding: 20px; text-align: center; border-bottom: 4px solid #0056b3; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; }
+        header h1 { margin: 0; font-size: 28px; color: #0056b3; }
+        .carrinho-topo { position: absolute; right: 30px; top: 22px; background-color: #ff7300; color: white; padding: 10px 15px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 4px 10px rgba(255, 115, 0, 0.3); transition: transform 0.2s; }
+        .carrinho-topo:hover { transform: scale(1.05); }
+        nav { background-color: #1a1e21; text-align: center; padding: 10px 0; position: sticky; top: 0; z-index: 1000; }
+        nav a { color: #ffffff; text-decoration: none; margin: 0 10px; font-weight: bold; font-size: 14px; padding: 8px 12px; border-radius: 4px; display: inline-block; cursor: pointer; transition: background 0.3s; }
+        nav a:hover, nav a.active { background-color: #ff7300; color: white; }
+        .intro-container { max-width: 800px; margin: 30px auto; padding: 0 20px; text-align: center; }
+        .intro-container h2 { font-size: 24px; color: #1a1e21; }
+        .intro-container p { color: #666; font-size: 16px; line-height: 1.6; }
+        .vitrine { max-width: 1000px; margin: 20px auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; padding: 20px; }
+        .produto-card { background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #eee; }
+        .carrossel-container { position: relative; width: 100%; height: 220px; background-color: #fafafa; overflow: hidden; }
+        .carrossel-container img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .carrossel-container img.active { display: block; }
+        .seta-carrossel { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; padding: 8px 12px; cursor: pointer; font-weight: bold; font-size: 14px; border-radius: 4px; }
+        .seta-esq { left: 5px; } .seta-dir { right: 5px; }
+        .produto-info { padding: 15px; text-align: center; }
+        .produto-info h3 { margin: 0 0 10px 0; font-size: 16px; color: #333; }
+        .produto-info .preco { font-size: 18px; font-weight: bold; color: #ff7300; margin-bottom: 15px; }
+        .btn-carrinho { display: block; background-color: #0056b3; color: white; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; border: none; width: 100%; transition: background 0.3s; }
+        .btn-carrinho:hover { background-color: #ff7300; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="txt-titulo-loja">Ary Art</h1>
+        <a href="cadastro.html" class="carrinho-topo" id="contador-carrinho">🛒 Carrinho (0)</a>
+    </header>
+    <nav id="menu-navegacao"></nav>
+    <div class="intro-container">
+        <h2 id="txt-boas-vindas">Bem-vindo ao nosso Catálogo Virtual</h2>
+        <p id="txt-descricao">Carregando catálogo...</p>
+    </div>
+    <div class="vitrine" id="vitrine-produtos"></div>
+
+    <script>
+        let produtosSalvos = [];
+        let carrinho = JSON.parse(localStorage.getItem('carrinho_itens')) || [];
+
+        window.onload = async function() {
+            await carregarConfiguracoes();
+            await carregarAbasEMenu();
+            await carregarProdutosVitrine();
+            atualizarContador();
+        }
+
+        async function carregarConfiguracoes() {
+            let r = await fetch('/api/config'), d = await r.json();
+            if(d) {
+                document.getElementById('txt-titulo-loja').innerText = d.titulo || "Ary Art";
+                document.getElementById('txt-descricao').innerText = d.subtitulo || "";
+            }
+        }
+
+        async function carregarAbasEMenu() {
+            let r = await fetch('/api/abas'), abas = await r.json();
+            let menu = document.getElementById('menu-navegacao');
+            menu.innerHTML = "";
+
+            let btnTodos = document.createElement('a');
+            btnTodos.innerText = "✨ Ver Todos"; btnTodos.className = "active";
+            btnTodos.onclick = function() { removerAtivos(); btnTodos.className = "active"; mostrarProdutos("Todos"); };
+            menu.appendChild(btnTodos);
+
+            if(abas) {
+                abas.forEach(aba => {
+                    let link = document.createElement('a'); link.innerText = aba;
+                    link.onclick = function() { removerAtivos(); link.className = "active"; mostrarProdutos(aba); };
+                    menu.appendChild(link);
+                });
+            }
+
+            let btnPedido = document.createElement('a'); btnPedido.innerText = "⚙️ Painel Admin"; btnPedido.href = "admin.html"; menu.appendChild(btnPedido);
+        }
+
+        function removerAtivos() { document.querySelectorAll('nav a').forEach(l => l.className = ""); }
+
+        async function carregarProdutosVitrine() {
+            let r = await fetch('/api/produtos');
+            produtosSalvos = await r.json();
+            mostrarProdutos("Todos");
+        }
+
+        function mostrarProdutos(categoria) {
+            let vitrine = document.getElementById('vitrine-produtos'); vitrine.innerHTML = "";
+            let filtrados = categoria === "Todos" ? produtosSalvos : produtosSalvos.filter(p => p.aba === categoria);
+
+            if(!filtrados || filtrados.length === 0) {
+                vitrine.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#999; font-style:italic;">Nenhum produto cadastrado aqui.</p>`;
+                return;
+            }
+
+            filtrados.forEach((prod, pIdx) => {
+                let card = document.createElement('div'); card.className = "produto-card";
+                let imagens = prod.imgs ? (typeof prod.imgs === 'string' ? prod.imgs.split(',') : prod.imgs) : ['images/logo.png'];
+                let tagsImagens = imagens.map((img, iIdx) => `<img src="${img.trim()}" class="img-carrossel-${pIdx} ${iIdx === 0 ? 'active' : ''}" onerror="this.src='images/logo.png'">`).join('');
+                let setas = imagens.length > 1 ? `<button class="seta-carrossel seta-esq" onclick="mudarFoto(${pIdx}, -1, ${imagens.length})">&#10094;</button><button class="seta-carrossel seta-dir" onclick="mudarFoto(${pIdx}, 1, ${imagens.length})">&#10095;</button>` : '';
+
+                card.innerHTML = `<div class="carrossel-container">${tagsImagens}${setas}</div><div class="produto-info"><h3>${prod.nome}</h3><div class="preco">R$ ${parseFloat(prod.preco).toFixed(2)}</div><button class="btn-carrinho" onclick="addCarrinho('${prod.nome}', ${prod.preco})">🛒 Adicionar ao Carrinho</button></div>`;
+                vitrine.appendChild(card);
+            });
+        }
+
+        function mudarFoto(pIdx, dir, total) {
+            let imgs = document.querySelectorAll(`.img-carrossel-${pIdx}`); let ativo = 0;
+            imgs.forEach((img, idx) => { if(img.classList.contains('active')) ativo = idx; img.classList.remove('active'); });
+            let prox = (ativo + dir + total) % total; imgs[prox].classList.add('active');
+        }
+
+        function addCarrinho(nome, preco) {
+            let item = carrinho.find(i => i.nome === nome);
+            if(item) item.quantidade += 1; else carrinho.push({ nome: nome, preco: parseFloat(preco), quantidade: 1 });
+            localStorage.setItem('carrinho_itens', JSON.stringify(carrinho)); atualizarContador(); alert(`✅ ${nome} no carrinho!`);
+        }
+
+        function atualizarContador() { document.getElementById('contador-carrinho').innerText = `🛒 Carrinho (${carrinho.reduce((s, i) => s + i.quantidade, 0)})`; }
+    </script>
+</body>
+</html>
