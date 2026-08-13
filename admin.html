@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -41,10 +40,35 @@
             <h2>🎁 Adicionar Produtos nas Abas</h2>
             <form id="form-produtos">
                 <div class="form-group"><label for="prod-nome">Nome do Produto:</label><input type="text" id="prod-nome" required></div>
-                <div class="form-group"><label for="prod-aba">Escolha a Aba Principal:</label><select id="prod-aba" required><option value="">-- Carregando abas... --</option></select></div>
-                <div class="form-group"><label for="prod-submenu">Escolha a Subcategoria:</label><select id="prod-submenu" required><option value="">-- Carregando submenus... --</option></select></div>
+                
+                <div class="form-group">
+                    <label for="prod-aba">Escolha a Aba Principal:</label>
+                    <select id="prod-aba" required>
+                        <option value="Bags">Bags</option>
+                        <option value="Chinelos">Chinelos</option>
+                        <option value="Lembrancinhas">Lembrancinhas</option>
+                        <option value="Azulejos">Azulejos</option>
+                        <option value="Canecas">Canecas</option>
+                        <option value="Camisetas">Camisetas</option>
+                        <option value="Almofadas">Almofadas</option>
+                        <option value="Chaveiros">Chaveiros</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="prod-submenu">Escolha a Subcategoria:</label>
+                    <select id="prod-submenu" required>
+                        <option value="Times">Times</option>
+                        <option value="Datas Comemorativas">Datas Comemorativas</option>
+                        <option value="Profissões">Profissões</option>
+                        <option value="Diversas">Diversas</option>
+                        <option value="Novidades">Novidades</option>
+                    </select>
+                </div>
+                
                 <div class="form-group"><label for="prod-preco">Preço (R$):</label><input type="text" id="prod-preco" placeholder="Ex: 35.00" required></div>
-                <div class="form-group"><label for="prod-img">Links das Fotos (Separadas por VÍRGULA):</label><textarea id="prod-img" rows="3" placeholder="Ex: https://linkdafoto.com"></textarea></div>
+                <div class="form-group"><label for="prod-img">Links das Fotos (Separadas por VÍRGULA):</label><textarea id="prod-img" rows="3" placeholder="Ex: https://linkdafoto.com" required></textarea></div>
                 <button type="submit">Cadastrar Produto</button>
             </form>
             <h3 style="font-size: 14px; margin-top: 20px;">Produtos Cadastrados no SQLite:</h3>
@@ -53,42 +77,33 @@
     </div>
 
     <script>
-        window.onload = async function() { await cAbas(); await cSubmenus(); await cProds(); }
+        window.onload = function() { cProds(); }
 
         function mostrarAviso() {
             let aviso = document.getElementById('mensagem-salvo'); aviso.style.display = 'block';
             setTimeout(() => { aviso.style.display = 'none'; }, 3000);
         }
 
-        async function cAbas() {
-            let abas = [{id:1,nome:"Bags"},{id:2,nome:"Chinelos"},{id:3,nome:"Lembrancinhas"},{id:4,nome:"Azulejos"},{id:5,nome:"Canecas"},{id:6,nome:"Camisetas"},{id:7,nome:"Almofadas"},{id:8,nome:"Chaveiros"},{id:9,nome:"Outros"}];
-            try { let r = await fetch('/api/categorias'); let dados = await r.json(); if(dados && dados.length > 0) abas = dados; } catch(e){}
-            let seletor = document.getElementById('prod-aba'); seletor.innerHTML = '<option value="">-- Selecione uma aba --</option>';
-            abas.forEach(a => { let o = document.createElement('option'); o.value = a.id; o.textContent = a.nome; seletor.appendChild(o); });
-        }
-
-        async function cSubmenus() {
-            let subs = [{id:1,nome:"Times"},{id:2,nome:"Datas Comemorativas"},{id:3,nome:"Profissões"},{id:4,nome:"Diversas"},{id:5,nome:"Novidades"}];
-            try { let r = await fetch('/api/subcategorias'); let dados = await r.json(); if(dados && dados.length > 0) subs = dados; } catch(e){}
-            let seletor = document.getElementById('prod-submenu'); seletor.innerHTML = '<option value="">-- Selecione um submenu --</option>';
-            subs.forEach(s => { let o = document.createElement('option'); o.value = s.id; o.textContent = s.nome; seletor.appendChild(o); });
-        }
-
         document.getElementById('form-produtos').addEventListener('submit', async function(e) {
             e.preventDefault();
-            let linkTexto = document.getElementById('prod-img').value;
-            let listaImagens = linkTexto.split(',').map(img => img.trim()).filter(img => img !== "");
             
             let p = { 
                 nome: document.getElementById('prod-nome').value, 
-                categoria_id: parseInt(document.getElementById('prod-aba').value), 
-                subcategoria_id: parseInt(document.getElementById('prod-submenu').value), 
+                categoria_id: document.getElementById('prod-aba').value, 
+                subcategoria_id: document.getElementById('prod-submenu').value, 
                 preco: parseFloat(document.getElementById('prod-preco').value.replace(',', '.')), 
-                imagens: listaImagens
+                imagens: document.getElementById('prod-img').value
             };
 
-            await fetch('/api/produtos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p) });
-            document.getElementById('form-produtos').reset(); await cProds(); mostrarAviso();
+            await fetch('/api/produtos', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(p) 
+            });
+            
+            document.getElementById('form-produtos').reset(); 
+            cProds(); 
+            mostrarAviso();
         });
 
         async function cProds() {
@@ -97,7 +112,7 @@
             if(prods) {
                 prods.forEach(p => {
                     let d = document.createElement('div'); d.className = "item-lista";
-                    d.innerHTML = `<span>🎁 <b>${p.nome}</b> - R$ ${p.preco.toFixed(2)}</span><button class="btn-danger" onclick="excluirProduto(${p.id})">❌ Excluir</button>`;
+                    d.innerHTML = `<span>🎁 <b>${p.nome}</b> - R$ ${parseFloat(p.preco).toFixed(2)} (${p.categoria_id} > ${p.subcategoria_id})</span><button class="btn-danger" onclick="excluirProduto(${p.id})">❌ Excluir</button>`;
                     lista.appendChild(d);
                 });
             }
@@ -105,7 +120,7 @@
 
         async function excluirProduto(id) {
             if(confirm("Deseja apagar este produto?")) {
-                await fetch(`/api/produtos/${id}`, { method: 'DELETE' }); await cProds(); mostrarAviso();
+                await fetch(`/api/produtos/${id}`, { method: 'DELETE' }); cProds(); mostrarAviso();
             }
         }
     </script>
