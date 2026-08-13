@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -10,20 +10,29 @@
         header h1 { margin: 0; font-size: 28px; color: #0056b3; }
         .carrinho-topo { position: absolute; right: 30px; top: 22px; background-color: #ff7300; color: white; padding: 10px 15px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 4px 10px rgba(255, 115, 0, 0.3); transition: transform 0.2s; }
         .carrinho-topo:hover { transform: scale(1.05); }
-        nav { background-color: #1a1e21; text-align: center; padding: 10px 0; position: sticky; top: 0; z-index: 1000; }
-        nav a { color: #ffffff; text-decoration: none; margin: 0 10px; font-weight: bold; font-size: 14px; padding: 8px 12px; border-radius: 4px; display: inline-block; cursor: pointer; transition: background 0.3s; }
+        
+        /* Menu de Navegação Avançado com Submenus (Dropdown) */
+        nav { background-color: #1a1e21; text-align: center; padding: 0; position: sticky; top: 0; z-index: 1000; display: flex; justify-content: center; flex-wrap: wrap; }
+        .menu-item { position: relative; display: inline-block; }
+        nav a { color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px; padding: 15px 20px; display: inline-block; cursor: pointer; transition: background 0.3s; }
         nav a:hover, nav a.active { background-color: #ff7300; color: white; }
+        
+        /* Caixa do Submenu Oculto */
+        .submenu-conteudo { display: none; position: absolute; background-color: #ffffff; min-width: 160px; box-shadow: 0px 8px 16px rgba(0,0,0,0.15); z-index: 1001; border-top: 3px solid #ff7300; text-align: left; }
+        .submenu-conteudo a { color: #333333; padding: 12px 16px; text-decoration: none; display: block; font-size: 13px; border-bottom: 1px solid #eee; width: calc(100% - 32px); }
+        .submenu-conteudo a:last-child { border-bottom: none; }
+        .submenu-conteudo a:hover { background-color: #f4f6f9; color: #ff7300; }
+        
+        /* Mostrar submenu ao passar o mouse */
+        .menu-item:hover .submenu-conteudo { display: block; }
+        
         .intro-container { max-width: 800px; margin: 30px auto; padding: 0 20px; text-align: center; }
         .intro-container h2 { font-size: 24px; color: #1a1e21; }
-        .intro-container p { color: #666; font-size: 16px; line-height: 1.6; }
         .vitrine { max-width: 1000px; margin: 20px auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; padding: 20px; }
         .produto-card { background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #eee; }
-        
-        /* AJUSTE DE IMAGEM: Garante que a foto apareça inteira sem cortes drásticos */
         .carrossel-container { position: relative; width: 100%; height: 220px; background-color: #ffffff; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .carrossel-container img { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
         .carrossel-container img.active { display: block; }
-        
         .seta-carrossel { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; padding: 8px 12px; cursor: pointer; font-weight: bold; font-size: 14px; border-radius: 4px; }
         .seta-esq { left: 5px; } .seta-dir { right: 5px; }
         .produto-info { padding: 15px; text-align: center; }
@@ -41,7 +50,7 @@
     <nav id="menu-navegacao"></nav>
     <div class="intro-container">
         <h2>Bem-vindo ao nosso Catálogo Virtual</h2>
-        <p>Navegue pelas abas abaixo para conferir as categorias exclusivas.</p>
+        <p>Passe o mouse ou toque nas abas para abrir as subcategorias.</p>
     </div>
     <div class="vitrine" id="vitrine-produtos"></div>
 
@@ -50,30 +59,49 @@
         let carrinho = JSON.parse(localStorage.getItem('carrinho_itens')) || [];
 
         window.onload = async function() {
-            await carregarAbasEMenu();
+            await carregarMenusESubmenus();
             await carregarProdutosVitrine();
             atualizarContador();
         }
 
-        async function carregarAbasEMenu() {
-            let r = await fetch('/api/categorias'), abas = await r.json();
+        async function carregarMenusESubmenus() {
+            let rCat = await fetch('/api/categorias'), abas = await rCat.json();
+            let rSub = await fetch('/api/subcategorias'), submenus = await rSub.json();
             let menu = document.getElementById('menu-navegacao');
             menu.innerHTML = "";
 
-            let btnTodos = document.createElement('a');
-            btnTodos.innerText = "✨ Ver Todos"; btnTodos.className = "active";
-            btnTodos.onclick = function() { removerAtivos(); btnTodos.className = "active"; mostrarProdutos("Todos"); };
-            menu.appendChild(btnTodos);
+            // Botão Ver Todos
+            let divTodos = document.createElement('div'); divTodos.className = "menu-item";
+            let btnTodos = document.createElement('a'); btnTodos.innerText = "✨ Ver Todos"; btnTodos.className = "active";
+            btnTodos.onclick = function() { removerAtivos(); btnTodos.className = "active"; mostrarProdutos("Todos", "Todos"); };
+            divTodos.appendChild(btnTodos); menu.appendChild(divTodos);
 
+            // Desenha cada Aba com seus Submenus flutuantes
             if(abas) {
                 abas.forEach(aba => {
-                    let link = document.createElement('a'); link.innerText = aba.nome;
-                    link.onclick = function() { removerAtivos(); link.className = "active"; mostrarProdutos(aba.id); };
-                    menu.appendChild(link);
+                    let divItem = document.createElement('div'); divItem.className = "menu-item";
+                    let linkPrincipal = document.createElement('a'); linkPrincipal.innerText = aba.nome;
+                    linkPrincipal.onclick = function() { removerAtivos(); linkPrincipal.className = "active"; mostrarProdutos(aba.id, "Todos"); };
+                    divItem.appendChild(linkPrincipal);
+
+                    let divSubContainer = document.createElement('div'); divSubContainer.className = "submenu-conteudo";
+                    if(submenus) {
+                        submenus.forEach(sub => {
+                            let linkSub = document.createElement('a'); linkSub.innerText = `• ${sub.nome}`;
+                            linkSub.onclick = function(e) { 
+                                e.stopPropagation(); removerAtivos(); linkPrincipal.className = "active";
+                                mostrarProdutos(aba.id, sub.id); 
+                            };
+                            divSubContainer.appendChild(linkSub);
+                        });
+                    }
+                    divItem.appendChild(divSubContainer); menu.appendChild(divItem);
                 });
             }
 
-            let btnPedido = document.createElement('a'); btnPedido.innerText = "⚙️ Painel Admin"; btnPedido.href = "admin.html"; menu.appendChild(btnPedido);
+            let divAdmin = document.createElement('div'); divAdmin.className = "menu-item";
+            let btnAdmin = document.createElement('a'); btnAdmin.innerText = "⚙️ Admin"; btnAdmin.href = "admin.html";
+            divAdmin.appendChild(btnAdmin); menu.appendChild(divAdmin);
         }
 
         function removerAtivos() { document.querySelectorAll('nav a').forEach(l => l.className = ""); }
@@ -81,40 +109,33 @@
         async function carregarProdutosVitrine() {
             let r = await fetch('/api/produtos');
             produtosSalvos = await r.json();
-            mostrarProdutos("Todos");
+            mostrarProdutos("Todos", "Todos");
         }
 
-        function mostrarProdutos(categoriaId) {
+        function mostrarProdutos(categoriaId, subcategoriaId) {
             let vitrine = document.getElementById('vitrine-produtos'); vitrine.innerHTML = "";
-            let filtrados = categoriaId === "Todos" ? produtosSalvos : produtosSalvos.filter(p => p.categoria_id == categoriaId);
+            
+            let filtrados = produtosSalvos;
+            if (categoriaId !== "Todos") filtrados = filtrados.filter(p => p.categoria_id == categoriaId);
+            if (subcategoriaId !== "Todos") filtrados = filtrados.filter(p => p.subcategoria_id == subcategoriaId);
 
             if(!filtrados || filtrados.length === 0) {
-                vitrine.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#999; font-style:italic;">Nenhum produto cadastrado aqui.</p>`;
+                vitrine.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#999; font-style:italic;">Nenhum produto cadastrado nesta categoria.</p>`;
                 return;
             }
 
             filtrados.forEach((prod, pIdx) => {
                 let card = document.createElement('div'); card.className = "produto-card";
-                
                 let imagens = [];
                 let dadosImagens = prod.imagens || prod.imgs;
 
                 if (dadosImagens) {
-                    if (Array.isArray(dadosImagens)) {
-                        imagens = dadosImagens;
-                    } else if (typeof dadosImagens === 'string') {
-                        try {
-                            imagens = JSON.parse(dadosImagens);
-                            if (!Array.isArray(imagens)) imagens = [dadosImagens];
-                        } catch(e) {
-                            imagens = dadosImagens.split(',').map(i => i.trim());
-                        }
+                    if (Array.isArray(dadosImagens)) imagens = dadosImagens;
+                    else if (typeof dadosImagens === 'string') {
+                        try { imagens = JSON.parse(dadosImagens); } catch(e) { imagens = dadosImagens.split(',').map(i => i.trim()); }
                     }
                 }
-
-                if (imagens.length === 0 || imagens[0] === "") {
-                    imagens = ['https://unsplash.com'];
-                }
+                if (imagens.length === 0 || imagens === "") imagens = ['https://unsplash.com'];
 
                 let tagsImagens = imagens.map((img, iIdx) => `<img src="${img}" class="img-carrossel-${pIdx} ${iIdx === 0 ? 'active' : ''}" onerror="this.src='https://unsplash.com'">`).join('');
                 let setas = imagens.length > 1 ? `<button class="seta-carrossel seta-esq" onclick="mudarFoto(${pIdx}, -1, ${imagens.length})">❮</button><button class="seta-carrossel seta-dir" onclick="mudarFoto(${pIdx}, 1, ${imagens.length})">❯</button>` : '';
@@ -126,17 +147,3 @@
 
         function mudarFoto(pIdx, dir, total) {
             let imgs = document.querySelectorAll(`.img-carrossel-${pIdx}`); let ativo = 0;
-            imgs.forEach((img, idx) => { if(img.classList.contains('active')) ativo = idx; img.classList.remove('active'); });
-            let prox = (ativo + dir + total) % total; imgs[prox].classList.add('active');
-        }
-
-        function addCarrinho(nome, preco) {
-            let item = carrinho.find(i => i.nome === nome);
-            if(item) item.quantidade += 1; else carrinho.push({ nome: nome, preco: parseFloat(preco), quantidade: 1 });
-            localStorage.setItem('carrinho_itens', JSON.stringify(carrinho)); atualizarContador(); alert(`✅ ${nome} adicionado ao carrinho!`);
-        }
-
-        function atualizarContador() { document.getElementById('contador-carrinho').innerText = `🛒 Carrinho (${carrinho.reduce((s, i) => s + i.quantidade, 0)})`; }
-    </script>
-</body>
-</html>
