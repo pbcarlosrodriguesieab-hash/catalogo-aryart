@@ -7,10 +7,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+// AUMENTO DE LIMITE PARA ACEITAR IMAGENS EM BASE64
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, '.')));
 
-// Usando o banco definitivo e limpo v3
 const caminhoBanco = './banco_aryart_v3.db';
 
 const db = new sqlite3.Database(caminhoBanco, (err) => {
@@ -34,7 +35,6 @@ function criarTabelas() {
     )`);
 }
 
-// ROTA DE BUSCA: Entrega os produtos salvos para a vitrine
 app.get('/api/produtos', (req, res) => {
     db.all("SELECT * FROM produtos", [], (err, rows) => {
         if (err) return res.status(500).json({ erro: err.message });
@@ -42,13 +42,12 @@ app.get('/api/produtos', (req, res) => {
     });
 });
 
-// ROTA DE CADASTRO: Grava o produto exatamente como texto simples enviado pelo admin
 app.post('/api/produtos', (req, res) => {
     const { nome, preco, categoria_id, subcategoria_id, imagens } = req.body;
 
     db.run(
         "INSERT INTO produtos (nome, preco, categoria_id, subcategoria_id, imagens, descricao) VALUES (?, ?, ?, ?, ?, ?)",
-        [nome, preco, categoria_id, subcategoria_id, imagens || "", ""],
+        [nome, preco, categoria_id, subcategoria_id, imagens || "[]", ""],
         function(err) {
             if (err) return res.status(500).json({ erro: err.message });
             res.json({ id: this.lastID, nome, preco, categoria_id, subcategoria_id, imagens });
@@ -56,7 +55,6 @@ app.post('/api/produtos', (req, res) => {
     );
 });
 
-// ROTA DE EXCLUSÃO
 app.delete('/api/produtos/:id', (req, res) => {
     const { id } = req.params;
     db.run("DELETE FROM produtos WHERE id = ?", [id], function(err) {
