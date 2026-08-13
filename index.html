@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -37,8 +37,8 @@
     </header>
     <nav id="menu-navegacao"></nav>
     <div class="intro-container">
-        <h2 id="txt-boas-vindas">Bem-vindo ao nosso Catálogo Virtual</h2>
-        <p id="txt-descricao">Navegue pelas nossas abas para conhecer nossos produtos.</p>
+        <h2>Bem-vindo ao nosso Catálogo Virtual</h2>
+        <p>Navegue pelas abas abaixo para conferir as categorias exclusivas.</p>
     </div>
     <div class="vitrine" id="vitrine-produtos"></div>
 
@@ -92,8 +92,22 @@
 
             filtrados.forEach((prod, pIdx) => {
                 let card = document.createElement('div'); card.className = "produto-card";
-                let imagens = (prod.imagens && prod.imagens.length > 0) ? prod.imagens : ['images/logo.png'];
-                let tagsImagens = imagens.map((img, iIdx) => `<img src="${img.trim()}" class="img-carrossel-${pIdx} ${iIdx === 0 ? 'active' : ''}" onerror="this.src='images/logo.png'">`).join('');
+                
+                // CORREÇÃO DA LEITURA DE IMAGENS: Lê lista ou string separada por vírgula
+                let imagens = [];
+                if (prod.imagens && Array.isArray(prod.imagens) && prod.imagens.length > 0) {
+                    imagens = prod.imagens;
+                } else if (prod.imagens && typeof prod.imagens === 'string') {
+                    imagens = prod.imagens.split(',').map(i => i.trim());
+                } else if (prod.imgs) {
+                    imagens = typeof prod.imgs === 'string' ? prod.imgs.split(',').map(i => i.trim()) : prod.imgs;
+                }
+                
+                if (imagens.length === 0 || imagens[0] === "") {
+                    imagens = ['images/logo.png'];
+                }
+
+                let tagsImagens = imagens.map((img, iIdx) => `<img src="${img}" class="img-carrossel-${pIdx} ${iIdx === 0 ? 'active' : ''}" onerror="this.src='https://unsplash.com'">`).join('');
                 let setas = imagens.length > 1 ? `<button class="seta-carrossel seta-esq" onclick="mudarFoto(${pIdx}, -1, ${imagens.length})">❮</button><button class="seta-carrossel seta-dir" onclick="mudarFoto(${pIdx}, 1, ${imagens.length})">❯</button>` : '';
 
                 card.innerHTML = `<div class="carrossel-container">${tagsImagens}${setas}</div><div class="produto-info"><h3>${prod.nome}</h3><div class="preco">R$ ${parseFloat(prod.preco).toFixed(2)}</div><button class="btn-carrinho" onclick="addCarrinho('${prod.nome}', ${prod.preco})">🛒 Adicionar ao Carrinho</button></div>`;
@@ -109,11 +123,11 @@
 
         function addCarrinho(nome, preco) {
             let item = carrinho.find(i => i.nome === nome);
-            if(item) item.quantidade += 1; else carrinho.push({ nome: nome, preco: parseFloat(preco), quantity: 1 });
-            localStorage.setItem('carrinho_itens', JSON.stringify(carrinho)); atualizarContador(); alert(`✅ ${nome} no carrinho!`);
+            if(item) item.quantidade += 1; else carrinho.push({ nome: nome, preco: parseFloat(preco), quantidade: 1 });
+            localStorage.setItem('carrinho_itens', JSON.stringify(carrinho)); atualizarContador(); alert(`✅ ${nome} adicionado!`);
         }
 
-        function atualizarContador() { document.getElementById('contador-carrinho').innerText = `🛒 Carrinho (${carrinho.reduce((s, i) => s + (i.quantidade || 1), 0)})`; }
+        function atualizarContador() { document.getElementById('contador-carrinho').innerText = `🛒 Carrinho (${carrinho.reduce((s, i) => s + i.quantidade, 0)})`; }
     </script>
 </body>
 </html>
