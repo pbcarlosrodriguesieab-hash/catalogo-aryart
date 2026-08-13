@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -19,10 +19,10 @@
         input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
         button { background-color: #0056b3; color: white; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; transition: background 0.3s; margin-top: 10px; }
         button:hover { background-color: #ff7300; }
-        .btn-danger { background-color: #dc3545; width: auto; padding: 5px 10px; font-size: 12px; margin: 0; border: none; color: white; border-radius: 4px; cursor: pointer; }
+        .btn-danger { background-color: #dc3545; width: auto; padding: 6px 12px; font-size: 13px; margin: 0; border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-danger:hover { background-color: #bd2130; }
         .alerta { background-color: #d4edda; color: #155724; padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; font-weight: bold; display: none; }
-        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
         .item-lista:last-child { border-bottom: none; }
     </style>
 </head>
@@ -39,21 +39,13 @@
     <div class="admin-container">
         <div id="mensagem-salvo" class="alerta">✅ Operação realizada com sucesso!</div>
         
-        <!-- Bloco Ocultado temporariamente caso seu server.js não use a rota de config global -->
-        <div class="box" style="display: none;">
-            <h2>⚙️ Configurações Gerais (Banco de Dados)</h2>
-            <form id="form-admin">
-                <div class="form-group"><label for="admin-whatsapp">WhatsApp de Atendimento:</label><input type="text" id="admin-whatsapp" placeholder="Ex: 5511999999999"></div>
-                <div class="form-group"><label for="admin-titulo-home">Título Principal:</label><input type="text" id="admin-titulo-home"></div>
-                <div class="form-group"><label for="admin-subtitulo-home">Texto/Subtítulo:</label><textarea id="admin-subtitulo-home" rows="3"></textarea></div>
-                <button type="submit">Salvar Alterações</button>
-            </form>
-        </div>
-
         <div class="box">
             <h2>🗂️ Criar Novas Abas e Subpáginas</h2>
             <form id="form-abas">
-                <div style="display: flex; gap: 10px;"><input type="text" id="nome-aba" placeholder="Ex: Canecas" required><button type="submit" style="width: auto; margin: 0; white-space: nowrap;">+ Criar Aba</button></div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="nome-aba" placeholder="Ex: Canecas" required>
+                    <button type="submit" style="width: auto; margin: 0; white-space: nowrap;">+ Criar Aba</button>
+                </div>
             </form>
             <h3 style="font-size: 14px; margin-top: 20px;">Abas Ativas no Menu:</h3>
             <div id="lista-abas"></div>
@@ -63,9 +55,9 @@
             <h2>🎁 Adicionar Produtos nas Abas</h2>
             <form id="form-produtos">
                 <div class="form-group"><label for="prod-nome">Nome do Produto:</label><input type="text" id="prod-nome" required></div>
-                <div class="form-group"><label for="prod-aba">Escolha a Aba:</label><select id="prod-aba" required><option value="">-- Carregando categorias... --</option></select></div>
-                <div class="form-group"><label for="prod-preco">Preço (R$):</label><input type="text" id="prod-preco" required></div>
-                <div class="form-group"><label for="prod-img">Links das Fotos (Separadas por VÍRGULA):</label><textarea id="prod-img" rows="3" placeholder="Ex: images/foto1.jpg, images/foto2.jpg"></textarea></div>
+                <div class="form-group"><label for="prod-aba">Escolha a Aba:</label><select id="prod-aba" required><option value="">-- Carregando abas... --</option></select></div>
+                <div class="form-group"><label for="prod-preco">Preço (R$):</label><input type="text" id="prod-preco" placeholder="Ex: 35.00" required></div>
+                <div class="form-group"><label for="prod-img">Links das Fotos (Separadas por VÍRGULA):</label><textarea id="prod-img" rows="3" placeholder="Ex: https://linkdafoto.com"></textarea></div>
                 <button type="submit">Cadastrar Produto</button>
             </form>
             <h3 style="font-size: 14px; margin-top: 20px;">Produtos Cadastrados no SQLite:</h3>
@@ -85,12 +77,16 @@
             setTimeout(() => { aviso.style.display = 'none'; }, 3000);
         }
 
-        // --- SISTEMA DE CATEGORIAS / ABAS ---
+        // --- GERENCIAMENTO DE CATEGORIAS / ABAS ---
         document.getElementById('form-abas').addEventListener('submit', async function(e) {
             e.preventDefault(); 
             let input = document.getElementById('nome-aba'), nomeAba = input.value.trim();
             if(nomeAba) {
-                await fetch('/api/categorias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: nomeAba }) });
+                await fetch('/api/categorias', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ nome: nomeAba }) 
+                });
                 input.value = ""; 
                 await cAbas(); 
                 mostrarAviso();
@@ -118,15 +114,15 @@
             }
         }
 
-        // --- SISTEMA DE PRODUTOS ---
+        // --- GERENCIAMENTO DE PRODUTOS ---
         document.getElementById('form-produtos').addEventListener('submit', async function(e) {
             e.preventDefault();
-            let listaImagens = document.getElementById('prod-img').value.split(',').map(img => img.trim()).filter(img => img !== "");
-            if(listaImagens.length === 0) listaImagens.push('images/logo.png');
-
+            let linkTexto = document.getElementById('prod-img').value;
+            let listaImagens = linkTexto.split(',').map(img => img.trim()).filter(img => img !== "");
+            
             let p = { 
                 nome: document.getElementById('prod-nome').value, 
-                categoria_id: document.getElementById('prod-aba').value, 
+                categoria_id: parseInt(document.getElementById('prod-aba').value), 
                 preco: parseFloat(document.getElementById('prod-preco').value.replace(',', '.')), 
                 imagens: listaImagens,
                 descricao: ""
@@ -151,9 +147,21 @@
                 prods.forEach(p => {
                     let d = document.createElement('div');
                     d.className = "item-lista";
-                    d.innerHTML = `<span>🎁 <b>${p.nome}</b> - R$ ${p.preco.toFixed(2)}</span>`;
+                    d.innerHTML = `
+                        <span>🎁 <b>${p.nome}</b> - R$ ${p.preco.toFixed(2)}</span>
+                        <button class="btn-danger" onclick="excluirProduto(${p.id})">❌ Excluir</button>
+                    `;
                     lista.appendChild(d);
                 });
+            }
+        }
+
+        // FUNÇÃO NOVA PARA EXCLUIR O PRODUTO DO BANCO DE DADOS
+        async function excluirProduto(id) {
+            if(confirm("Tem certeza que deseja apagar este produto definitivamente?")) {
+                await fetch(`/api/produtos/${id}`, { method: 'DELETE' });
+                await cProds();
+                mostrarAviso();
             }
         }
     </script>
