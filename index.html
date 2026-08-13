@@ -26,7 +26,7 @@
         .carrossel-container { position: relative; width: 100%; height: 220px; background-color: #ffffff; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .carrossel-container img { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
         .carrossel-container img.active { display: block; }
-        .seta-carrossel { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; padding: 8px 12px; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        .seta-carrossel { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; padding: 8px 12px; cursor: pointer; font-weight: bold; border-radius: 4px; z-index: 10; }
         .seta-esq { left: 5px; } .seta-dir { right: 5px; }
         .produto-info { padding: 15px; text-align: center; }
         .produto-info h3 { margin: 0 0 10px 0; font-size: 16px; color: #333; }
@@ -42,108 +42,98 @@
     </header>
     
     <nav id="menu-navegacao">
-        <div class="menu-item"><a onclick="filtrarProdutos('Todos', 'Todos')" class="active" id="btn-todos">✨ Ver Todos</a></div>
+        <div class="menu-item"><a onclick="filtrarProdutos('Todos', 'Todos', this)" class="active" id="btn-todos">✨ Ver Todos</a></div>
         
-        <!-- O Menu HTML Fixo Casa Perfeitamente com os textos do Painel Administrativo -->
         <div class="menu-item">
-            <a onclick="filtrarProdutos('Bags', 'Todos')">Bags</a>
+            <a onclick="filtrarProdutos('Bags', 'Todos', this)">Bags</a>
             <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos('Bags', 'Times')">• Times</a>
-                <a onclick="filtrarProdutos('Bags', 'Datas Comemorativas')">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos('Bags', 'Profissões')">• Profissões</a>
-                <a onclick="filtrarProdutos('Bags', 'Diversas')">• Diversas</a>
-                <a onclick="filtrarProdutos('Bags', 'Novidades')">• Novidades</a>
+                <a onclick="filtrarProdutos('Bags', 'Times', this)">• Times</a>
+                <a onclick="filtrarProdutos('Bags', 'Datas Comemorativas', this)">• Datas Comemorativas</a>
+                <a onclick="filtrarProdutos('Bags', 'Profissões', this)">• Profissões</a>
+                <a onclick="filtrarProdutos('Bags', 'Diversas', this)">• Diversas</a>
+                <a onclick="filtrarProdutos('Bags', 'Novidades', this)">• Novidades</a>
             </div>
         </div>
-
         <div class="menu-item">
-            <a onclick="filtrarProdutos('Chinelos', 'Todos')">Chinelos</a>
+            <a onclick="filtrarProdutos('Chinelos', 'Todos', this)">Chinelos</a>
             <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos('Chinelos', 'Times')">• Times</a>
-                <a onclick="filtrarProdutos('Chinelos', 'Datas Comemorativas')">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos('Chinelos', 'Profissões')">• Profissões</a>
-                <a onclick="filtrarProdutos('Chinelos', 'Diversas')">• Diversas</a>
-                <a onclick="filtrarProdutos('Chinelos', 'Novidades')">• Novidades</a>
+                <a onclick="filtrarProdutos('Chinelos', 'Times', this)">• Times</a>
+                <a onclick="filtrarProdutos('Chinelos', 'Datas Comemorativas', this)">• Datas Comemorativas</a>
+                <a onclick="filtrarProdutos('Chinelos', 'Profissões', this)">• Profissões</a>
+                <a onclick="filtrarProdutos('Chinelos', 'Diversas', this)">• Diversas</a>
+                <a onclick="filtrarProdutos('Chinelos', 'Novidades', this)">• Novidades</a>
             </div>
         </div>
-
         <div class="menu-item">
-            <a onclick="filtrarProdutos('Lembrancinhas', 'Todos')">Lembrancinhas</a>
+            <a onclick="filtrarProdutos('Lembrancinhas', 'Todos', this)">Lembrancinhas</a>
             <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos('Lembrancinhas', 'Times')">• Times</a>
-                <a onclick="filtrarProdutos('Lembrancinhas', 'Datas Comemorativas')">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos('Lembrancinhas', 'Profissões')">• Profissões</a>
-                <a onclick="filtrarProdutos('Lembrancinhas', 'Diversas')">• Diversas</a>
-                <a onclick="filtrarProdutos('Lembrancinhas', 'Novidades')">• Novidades</a>
+                <a onclick="filtrarProdutos('Lembrancinhas', 'Times', this)">• Times</a>
+                <a onclick="filtrarProdutos('Lembrancinhas', 'Datas Comemorativas', this)">• Datas Comemorativas</a>
+                <a onclick="filtrarProdutos('Lembrancinhas', 'Profissões', this)">• Profissões</a>
+                <a onclick="filtrarProdutos('Lembrancinhas', 'Diversas', this)">• Diversas</a>
+                <a onclick="filtrarProdutos('Lembrancinhas', 'Novidades', this)">• Novidades</a>
             </div>
         </div>
-
         <div class="menu-item">
-            <a onclick="filtrarProdutos('Azulejos', 'Todos')">Azulejos</a>
+            <a onclick="filtrarProdutos('Azulejos', 'Todos', this)">Azulejos</a>
             <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos('Azulejos', 'Times')">• Times</a>
-                <a onclick="filtrarProdutos('Azulejos', 'Datas Comemorativas')">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos('Azulejos', 'Profissões')">• Profissões</a>
-                <a onclick="filtrarProdutos('Azulejos', 'Diversas')">• Diversas</a>
-                <a onclick="filtrarProdutos('Azulejos', 'Novidades')">• Novidades</a>
+                <a onclick="filtrarProdutos('Azulejos', 'Times', this)">• Times</a>
+                <a onclick="filtrarProdutos('Azulejos', 'Datas Comemorativas', this)">• Datas Comemorativas</a>
+                <a onclick="filtrarProdutos('Azulejos', 'Profissões', this)">• Profissões</a>
+                <a onclick="filtrarProdutos('Azulejos', 'Diversas', this)">• Diversas</a>
+                <a onclick="filtrarProdutos('Azulejos', 'Novidades', this)">• Novidades</a>
             </div>
         </div>
-
         <div class="menu-item">
-            <a onclick="filtrarProdutos('Canecas', 'Todos')">Canecas</a>
+            <a onclick="filtrarProdutos('Canecas', 'Todos', this)">Canecas</a>
             <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos('Canecas', 'Times')">• Times</a>
-                <a onclick="filtrarProdutos('Canecas', 'Datas Comemorativas')">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos('Canecas', 'Profissões')">• Profissões</a>
-                <a onclick="filtrarProdutos('Canecas', 'Diversas')">• Diversas</a>
-                <a onclick="filtrarProdutos('Canecas', 'Novidades')">• Novidades</a>
+                <a onclick="filtrarProdutos('Canecas', 'Times', this)">• Times</a>
+                <a onclick="filtrarProdutos('Canecas', 'Datas Comemorativas', this)">• Datas Comemorativas</a>
+                <a onclick="filtrarProdutos('Canecas', 'Profissões', this)">• Profissões</a>
+                <a onclick="filtrarProdutos('Canecas', 'Diversas', this)">• Diversas</a>
+                <a onclick="filtrarProdutos('Canecas', 'Novidades', this)">• Novidades</a>
             </div>
         </div>
-
         <div class="menu-item">
-            <a onclick="filtrarProdutos('Camisetas', 'Todos')">Camisetas</a>
+            <a onclick="filtrarProdutos('Camisetas', 'Todos', this)">Camisetas</a>
             <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos('Camisetas', 'Times')">• Times</a>
-                <a onclick="filtrarProdutos('Camisetas', 'Datas Comemorativas')">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos('Camisetas', 'Profissões')">• Profissões</a>
-                <a onclick="filtrarProdutos('Camisetas', 'Diversas')">• Diversas</a>
-                <a onclick="filtrarProdutos('Camisetas', 'Novidades')">• Novidades</a>
+                <a onclick="filtrarProdutos('Camisetas', 'Times', this)">• Times</a>
+                <a onclick="filtrarProdutos('Camisetas', 'Datas Comemorativas', this)">• Datas Comemorativas</a>
+                <a onclick="filtrarProdutos('Camisetas', 'Profissões', this)">• Profissões</a>
+                <a onclick="filtrarProdutos('Camisetas', 'Diversas', this)">• Diversas</a>
+                <a onclick="filtrarProdutos('Camisetas', 'Novidades', this)">• Novidades</a>
             </div>
         </div>
-
         <div class="menu-item">
-            <a onclick="filtrarProdutos('Almofadas', 'Todos')">Almofadas</a>
+            <a onclick="filtrarProdutos('Almofadas', 'Todos', this)">Almofadas</a>
             <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos('Almofadas', 'Times')">• Times</a>
-                <a onclick="filtrarProdutos('Almofadas', 'Datas Comemorativas')">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos('Almofadas', 'Profissões')">• Profissões</a>
-                <a onclick="filtrarProdutos('Almofadas', 'Diversas')">• Diversas</a>
-                <a onclick="filtrarProdutos('Almofadas', 'Novidades')">• Novidades</a>
+                <a onclick="filtrarProdutos('Almofadas', 'Times', this)">• Times</a>
+                <a onclick="filtrarProdutos('Almofadas', 'Datas Comemorativas', this)">• Datas Comemorativas</a>
+                <a onclick="filtrarProdutos('Almofadas', 'Profissões', this)">• Profissões</a>
+                <a onclick="filtrarProdutos('Almofadas', 'Diversas', this)">• Diversas</a>
+                <a onclick="filtrarProdutos('Almofadas', 'Novidades', this)">• Novidades</a>
             </div>
         </div>
-
         <div class="menu-item">
-            <a onclick="filtrarProdutos('Chaveiros', 'Todos')">Chaveiros</a>
+            <a onclick="filtrarProdutos('Chaveiros', 'Todos', this)">Chaveiros</a>
             <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos('Chaveiros', 'Times')">• Times</a>
-                <a onclick="filtrarProdutos('Chaveiros', 'Datas Comemorativas')">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos('Chaveiros', 'Profissões')">• Profissões</a>
-                <a onclick="filtrarProdutos('Chaveiros', 'Diversas')">• Diversas</a>
-                <a onclick="filtrarProdutos('Chaveiros', 'Novidades')">• Novidades</a>
+                <a onclick="filtrarProdutos('Chaveiros', 'Times', this)">• Times</a>
+                <a onclick="filtrarProdutos('Chaveiros', 'Datas Comemorativas', this)">• Datas Comemorativas</a>
+                <a onclick="filtrarProdutos('Chaveiros', 'Profissões', this)">• Profissões</a>
+                <a onclick="filtrarProdutos('Chaveiros', 'Diversas', this)">• Diversas</a>
+                <a onclick="filtrarProdutos('Chaveiros', 'Novidades', this)">• Novidades</a>
             </div>
         </div>
-
         <div class="menu-item">
-            <a onclick="filtrarProdutos('Outros', 'Todos')">Outros</a>
+            <a onclick="filtrarProdutos('Outros', 'Todos', this)">Outros</a>
             <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos('Outros', 'Times')">• Times</a>
-                <a onclick="filtrarProdutos('Outros', 'Datas Comemorativas')">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos('Outros', 'Profissões')">• Profissões</a>
-                <a onclick="filtrarProdutos('Outros', 'Diversas')">• Diversas</a>
-                <a onclick="filtrarProdutos('Outros', 'Novidades')">• Novidades</a>
+                <a onclick="filtrarProdutos('Outros', 'Times', this)">• Times</a>
+                <a onclick="filtrarProdutos('Outros', 'Datas Comemorativas', this)">• Datas Comemorativas</a>
+                <a onclick="filtrarProdutos('Outros', 'Profissões', this)">• Profissões</a>
+                <a onclick="filtrarProdutos('Outros', 'Diversas', this)">• Diversas</a>
+                <a onclick="filtrarProdutos('Outros', 'Novidades', this)">• Novidades</a>
             </div>
         </div>
-
         <div class="menu-item"><a href="admin.html">⚙️ Admin</a></div>
     </nav>
 
@@ -151,3 +141,116 @@
         <h2>Bem-vindo ao nosso Catálogo Virtual</h2>
         <p>Passe o mouse ou toque nas abas para abrir as subcategorias.</p>
     </div>
+
+    <!-- CONTAINER DA VITRINE ADICIONADO AQUI -->
+    <div class="vitrine" id="vitrine"></div>
+
+    <script>
+        let todosProdutos = [];
+
+        async function carregarProdutos() {
+            try {
+                let r = await fetch('/api/produtos');
+                todosProdutos = await r.json();
+                filtrarProdutos('Todos', 'Todos', document.getElementById('btn-todos'));
+            } catch (err) {
+                console.error("Erro ao carregar produtos:", err);
+            }
+        }
+
+        function filtrarProdutos(categoria, subcategoria, elementoClicado) {
+            // Atualiza visualmente qual botão está ativo
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+            if(elementoClicado) elementoClicado.classList.add('active');
+
+            let filtrados = todosProdutos;
+            if(categoria !== 'Todos') {
+                filtrados = filtrados.filter(p => p.categoria_id === categoria);
+            }
+            if(subcategoria !== 'Todos') {
+                filtrados = filtrados.filter(p => p.subcategoria_id === subcategoria);
+            }
+            renderizarProdutos(filtrados);
+        }
+
+        function renderizarProdutos(lista) {
+            const vitrine = document.getElementById('vitrine');
+            vitrine.innerHTML = '';
+            
+            if(lista.length === 0) {
+                vitrine.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">Nenhum produto encontrado nesta categoria.</p>';
+                return;
+            }
+
+            lista.forEach((p, index) => {
+                let imagens = [];
+                try {
+                    // Tenta ler o formato novo (JSON com Base64)
+                    imagens = JSON.parse(p.imagens);
+                } catch(e) {
+                    // Fallback caso ainda exista algum produto muito antigo com link simples
+                    if(p.imagens) imagens = [p.imagens];
+                }
+                
+                if(!Array.isArray(imagens) || imagens.length === 0) {
+                    imagens = ['https://via.placeholder.com/240x220?text=Sem+Foto'];
+                }
+
+                const card = document.createElement('div');
+                card.className = 'produto-card';
+                
+                let imagensHTML = '';
+                imagens.forEach((img, i) => {
+                    imagensHTML += `<img src="${img}" class="${i === 0 ? 'active' : ''}" alt="${p.nome}">`;
+                });
+
+                let setasHTML = '';
+                if(imagens.length > 1) {
+                    setasHTML = `
+                        <button class="seta-carrossel seta-esq" onclick="mudarFoto(${index}, -1, event)">❮</button>
+                        <button class="seta-carrossel seta-dir" onclick="mudarFoto(${index}, 1, event)">❯</button>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="carrossel-container" id="carrossel-${index}">
+                        ${imagensHTML}
+                        ${setasHTML}
+                    </div>
+                    <div class="produto-info">
+                        <h3>${p.nome}</h3>
+                        <div class="preco">R$ ${parseFloat(p.preco).toFixed(2)}</div>
+                        <button class="btn-carrinho" onclick="adicionarCarrinho(${p.id})">Adicionar</button>
+                    </div>
+                `;
+                vitrine.appendChild(card);
+            });
+        }
+
+        function mudarFoto(indexCard, direction, event) {
+            event.stopPropagation(); // Evita que o clique na seta feche o submenu
+            const container = document.getElementById(`carrossel-${indexCard}`);
+            const imgs = container.querySelectorAll('img');
+            let activeIndex = 0;
+            
+            imgs.forEach((img, i) => {
+                if(img.classList.contains('active')) activeIndex = i;
+                img.classList.remove('active');
+            });
+            
+            let newIndex = activeIndex + direction;
+            if(newIndex < 0) newIndex = imgs.length - 1;
+            if(newIndex >= imgs.length) newIndex = 0;
+            
+            imgs[newIndex].classList.add('active');
+        }
+        
+        function adicionarCarrinho(id) {
+            alert('Produto adicionado! (Integração com carrinho pendente)');
+            // Aqui entraria a lógica do seu carrinho
+        }
+
+        window.onload = carregarProdutos;
+    </script>
+</body>
+</html>
