@@ -26,6 +26,204 @@
         .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; gap: 10px; }
         #preview-imagens { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
         #preview-imagens img { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 2px solid #ddd; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-overlay.aberto { display: flex; }
+        .modal-box { background: white; border-radius: 12px; padding: 25px; max-width: 620px; width: 92%; max-height: 85vh; overflow-y: auto; position: relative; }
+        .modal-fechar { position: absolute; top: 10px; right: 15px; font-size: 26px; color: #999; cursor: pointer; font-weight: bold; }
+        .modal-fechar:hover { color: #dc3545; }
+        #modal-nome { color: #0056b3; margin: 0 0 5px 0; }
+        #modal-info { color: #666; font-size: 14px; margin: 0 0 15px 0; }
+        #modal-fotos { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        #modal-fotos img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; }
+        .modal-acoes { display: flex; gap: 10px; justify-content: flex-end; }
+        .modal-acoes .btn-danger { padding: 8px 16px; font-size: 14px; }
+        .btn-neutro { background-color: #6c757d; width: auto; padding: 8px 16px; font-size: 14px; }
+        .btn-neutro:hover { background-color: #5a6268; }
+    </style>
+</head>
+<body>
+    <script>
+        let uValido = "aryart", sValido = "art123";
+        let uDig = prompt("Digite o Usuário de Administrador:"), sDig = prompt("Digite a Senha de Administrador:");
+        if (uDig !== uValido || sDig !== sValido) { alert("Acesso Negado!"); window.location.href = "index.html"; }
+    </script>
+    <header>
+        <h1>Ary<span>Art</span> | Painel Admin</h1>
+        <nav><a href="index.html" target="_blank">👁️ Ver Site</a></nav>
+    </header>
+    <div class="admin-container">
+        <div id="mensagem-salvo" class="alerta">✅ Operação realizada com sucesso!</div>
 
-        /* ===== TELA INTERNA (MODAL) DE VISUALIZAÇÃO DO PRODUTO ===== */
-        .modal
+        <div class="box">
+            <h2>🎁 Adicionar Produtos nas Abas</h2>
+            <form id="form-produtos">
+                <div class="form-group"><label for="prod-nome">Nome do Produto:</label><input type="text" id="prod-nome" required></div>
+                
+                <div class="form-group">
+                    <label for="prod-aba">Escolha a Aba Principal:</label>
+                    <select id="prod-aba" required>
+                        <option value="Bags">Bags</option>
+                        <option value="Chinelos">Chinelos</option>
+                        <option value="Lembrancinhas">Lembrancinhas</option>
+                        <option value="Azulejos">Azulejos</option>
+                        <option value="Canecas">Canecas</option>
+                        <option value="Camisetas">Camisetas</option>
+                        <option value="Almofadas">Almofadas</option>
+                        <option value="Chaveiros">Chaveiros</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="prod-submenu">Escolha a Subcategoria:</label>
+                    <select id="prod-submenu" required>
+                        <option value="Times">Times</option>
+                        <option value="Datas Comemorativas">Datas Comemorativas</option>
+                        <option value="Profissões">Profissões</option>
+                        <option value="Diversas">Diversas</option>
+                        <option value="Novidades">Novidades</option>
+                    </select>
+                </div>
+                
+                <div class="form-group"><label for="prod-preco">Preço (R$):</label><input type="text" id="prod-preco" placeholder="Ex: 35.00" required></div>
+                
+                <div class="form-group">
+                    <label for="prod-img">📸 Selecionar Foto(s) do Computador:</label>
+                    <input type="file" id="prod-img" accept="image/*" multiple required>
+                    <div id="preview-imagens"></div>
+                </div>
+                
+                <button type="submit">Cadastrar Produto</button>
+            </form>
+            <h3 style="font-size: 14px; margin-top: 20px;">Produtos Cadastrados no SQLite:</h3>
+            <div id="lista-produtos"></div>
+        </div>
+    </div>
+
+    <div id="modal-produto" class="modal-overlay">
+        <div class="modal-box">
+            <span class="modal-fechar" onclick="fecharModal()">&times;</span>
+            <h2 id="modal-nome"></h2>
+            <p id="modal-info"></p>
+            <div id="modal-fotos"></div>
+            <div class="modal-acoes">
+                <button class="btn-neutro" onclick="fecharModal()">Fechar</button>
+                <button class="btn-danger" id="btn-excluir-modal">❌ Excluir Produto</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let imagensBase64 = [];
+        let listaProdutos = [];
+
+        document.getElementById('prod-img').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            imagensBase64 = [];
+            const preview = document.getElementById('preview-imagens');
+            preview.innerHTML = '';
+            
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imagensBase64.push(event.target.result);
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        window.onload = function() { cProds(); }
+
+        function mostrarAviso() {
+            let aviso = document.getElementById('mensagem-salvo'); aviso.style.display = 'block';
+            setTimeout(() => { aviso.style.display = 'none'; }, 3000);
+        }
+
+        document.getElementById('form-produtos').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if(imagensBase64.length === 0) {
+                alert("Por favor, selecione pelo menos uma foto.");
+                return;
+            }
+
+            let p = { 
+                nome: document.getElementById('prod-nome').value, 
+                categoria_id: document.getElementById('prod-aba').value, 
+                subcategoria_id: document.getElementById('prod-submenu').value, 
+                preco: parseFloat(document.getElementById('prod-preco').value.replace(',', '.')), 
+                imagens: JSON.stringify(imagensBase64) 
+            };
+
+            await fetch('/api/produtos', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(p) 
+            });
+            
+            document.getElementById('form-produtos').reset(); 
+            document.getElementById('preview-imagens').innerHTML = '';
+            imagensBase64 = [];
+            await cProds(); 
+            mostrarAviso();
+        });
+
+        async function cProds() {
+            let r = await fetch('/api/produtos'), prods = await r.json();
+            listaProdutos = prods || [];
+            let lista = document.getElementById('lista-produtos'); lista.innerHTML = "";
+            listaProdutos.forEach(p => {
+                let d = document.createElement('div'); d.className = "item-lista";
+                d.innerHTML = '<span>🎁 <b>' + p.nome + '</b> - R$ ' + parseFloat(p.preco).toFixed(2) + ' (' + p.categoria_id + ' > ' + p.subcategoria_id + ')</span>' +
+                '<span style="white-space: nowrap;">' +
+                    '<button class="btn-ver" onclick="verProduto(' + p.id + ')">👁️ Ver</button> ' +
+                    '<button class="btn-danger" onclick="excluirProduto(' + p.id + ')">❌ Excluir</button>' +
+                '</span>';
+                lista.appendChild(d);
+            });
+        }
+
+        function verProduto(id) {
+            const p = listaProdutos.find(prod => prod.id === id);
+            if(!p) return;
+
+            document.getElementById('modal-nome').textContent = "🎁 " + p.nome;
+            document.getElementById('modal-info').textContent = 'R$ ' + parseFloat(p.preco).toFixed(2) + '  •  ' + p.categoria_id + ' > ' + p.subcategoria_id;
+            
+            let imagens = [];
+            try { imagens = JSON.parse(p.imagens); } catch(e) { if(p.imagens) imagens = [p.imagens]; }
+            
+            const fotosDiv = document.getElementById('modal-fotos');
+            fotosDiv.innerHTML = '';
+            if(imagens.length === 0) {
+                fotosDiv.innerHTML = '<p style="color:#666; grid-column: 1/-1;">Este produto não tem fotos cadastradas.</p>';
+            } else {
+                imagens.forEach(src => {
+                    const img = document.createElement('img');
+                    img.src = src;
+                    fotosDiv.appendChild(img);
+                });
+            }
+            
+            document.getElementById('btn-excluir-modal').onclick = function() { excluirProduto(p.id); };
+            document.getElementById('modal-produto').classList.add('aberto');
+        }
+
+        function fecharModal() {
+            document.getElementById('modal-produto').classList.remove('aberto');
+        }
+
+        async function excluirProduto(id) {
+            if(confirm("Deseja apagar este produto?")) {
+                await fetch('/api/produtos/' + id, { method: 'DELETE' });
+                fecharModal();
+                await cProds();
+                mostrarAviso();
+            }
+        }
+    </script>
+</body>
+</html>
