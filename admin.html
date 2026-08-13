@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -19,153 +19,13 @@
         button { background-color: #0056b3; color: white; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; }
         button:hover { background-color: #ff7300; }
         .btn-danger { background-color: #dc3545; width: auto; padding: 6px 12px; font-size: 13px; border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-danger:hover { background-color: #b02a37; }
+        .btn-ver { background-color: #17a2b8; width: auto; padding: 6px 12px; font-size: 13px; border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; }
+        .btn-ver:hover { background-color: #117888; }
         .alerta { background-color: #d4edda; color: #155724; padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; font-weight: bold; display: none; }
-        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; gap: 10px; }
         #preview-imagens { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
         #preview-imagens img { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 2px solid #ddd; }
-    </style>
-</head>
-<body>
-    <script>
-        let uValido = "aryart", sValido = "art123";
-        let uDig = prompt("Digite o Usuário de Administrador:"), sDig = prompt("Digite a Senha de Administrador:");
-        if (uDig !== uValido || sDig !== sValido) { alert("Acesso Negado!"); window.location.href = "index.html"; }
-    </script>
-    <header>
-        <h1>Ary<span>Art</span> | Painel Admin</h1>
-        <nav><a href="index.html" target="_blank">👁️ Ver Site</a></nav>
-    </header>
-    <div class="admin-container">
-        <div id="mensagem-salvo" class="alerta">✅ Operação realizada com sucesso!</div>
 
-        <div class="box">
-            <h2>🎁 Adicionar Produtos nas Abas</h2>
-            <form id="form-produtos">
-                <div class="form-group"><label for="prod-nome">Nome do Produto:</label><input type="text" id="prod-nome" required></div>
-                
-                <div class="form-group">
-                    <label for="prod-aba">Escolha a Aba Principal:</label>
-                    <select id="prod-aba" required>
-                        <option value="Bags">Bags</option>
-                        <option value="Chinelos">Chinelos</option>
-                        <option value="Lembrancinhas">Lembrancinhas</option>
-                        <option value="Azulejos">Azulejos</option>
-                        <option value="Canecas">Canecas</option>
-                        <option value="Camisetas">Camisetas</option>
-                        <option value="Almofadas">Almofadas</option>
-                        <option value="Chaveiros">Chaveiros</option>
-                        <option value="Outros">Outros</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="prod-submenu">Escolha a Subcategoria:</label>
-                    <select id="prod-submenu" required>
-                        <option value="Times">Times</option>
-                        <option value="Datas Comemorativas">Datas Comemorativas</option>
-                        <option value="Profissões">Profissões</option>
-                        <option value="Diversas">Diversas</option>
-                        <option value="Novidades">Novidades</option>
-                    </select>
-                </div>
-                
-                <div class="form-group"><label for="prod-preco">Preço (R$):</label><input type="text" id="prod-preco" placeholder="Ex: 35.00" required></div>
-                
-                <div class="form-group">
-                    <label for="prod-img">📸 Selecionar Foto(s) do Computador:</label>
-                    <input type="file" id="prod-img" accept="image/*" multiple required>
-                    <div id="preview-imagens"></div>
-                </div>
-                
-                <button type="submit">Cadastrar Produto</button>
-            </form>
-            <h3 style="font-size: 14px; margin-top: 20px;">Produtos Cadastrados no SQLite:</h3>
-            <div id="lista-produtos"></div>
-        </div>
-    </div>
-
-    <script>
-        let imagensBase64 = [];
-
-        // Lógica para ler as fotos do computador e transformar em Base64
-        document.getElementById('prod-img').addEventListener('change', function(e) {
-            const files = e.target.files;
-            imagensBase64 = [];
-            const preview = document.getElementById('preview-imagens');
-            preview.innerHTML = '<p style="font-size:12px; color:#666;">Carregando prévia...</p>';
-            
-            Array.from(files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    imagensBase64.push(event.target.result);
-                    const img = document.createElement('img');
-                    img.src = event.target.result;
-                    preview.innerHTML = ''; // Limpa o texto de carregando na primeira foto
-                    // Re-renderiza todas as prévias
-                    imagensBase64.forEach(src => {
-                        const i = document.createElement('img');
-                        i.src = src;
-                        preview.appendChild(i);
-                    });
-                };
-                reader.readAsDataURL(file);
-            });
-        });
-
-        window.onload = function() { cProds(); }
-
-        function mostrarAviso() {
-            let aviso = document.getElementById('mensagem-salvo'); aviso.style.display = 'block';
-            setTimeout(() => { aviso.style.display = 'none'; }, 3000);
-        }
-
-        document.getElementById('form-produtos').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if(imagensBase64.length === 0) {
-                alert("Por favor, selecione pelo menos uma foto.");
-                return;
-            }
-
-            let p = { 
-                nome: document.getElementById('prod-nome').value, 
-                categoria_id: document.getElementById('prod-aba').value, 
-                subcategoria_id: document.getElementById('prod-submenu').value, 
-                preco: parseFloat(document.getElementById('prod-preco').value.replace(',', '.')), 
-                // Envia as fotos como um texto JSON para o banco de dados
-                imagens: JSON.stringify(imagensBase64) 
-            };
-
-            await fetch('/api/produtos', { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify(p) 
-            });
-            
-            document.getElementById('form-produtos').reset(); 
-            document.getElementById('preview-imagens').innerHTML = '';
-            imagensBase64 = [];
-            cProds(); 
-            mostrarAviso();
-        });
-
-        async function cProds() {
-            let r = await fetch('/api/produtos'), prods = await r.json();
-            let lista = document.getElementById('lista-produtos'); lista.innerHTML = "";
-            if(prods) {
-                prods.forEach(p => {
-                    let d = document.createElement('div'); d.className = "item-lista";
-                    d.innerHTML = `<span>🎁 <b>${p.nome}</b> - R$ ${parseFloat(p.preco).toFixed(2)} (${p.categoria_id} > ${p.subcategoria_id})</span><button class="btn-danger" onclick="excluirProduto(${p.id})">❌ Excluir</button>`;
-                    lista.appendChild(d);
-                });
-            }
-        }
-
-        async function excluirProduto(id) {
-            if(confirm("Deseja apagar este produto?")) {
-                await fetch(`/api/produtos/${id}`, { method: 'DELETE' }); cProds(); mostrarAviso();
-            }
-        }
-    </script>
-</body>
-</html>
+        /* ===== TELA INTERNA (MODAL) DE VISUALIZAÇÃO DO PRODUTO ===== */
+        .modal
