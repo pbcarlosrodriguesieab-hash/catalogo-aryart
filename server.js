@@ -1,124 +1,103 @@
-import express from 'express';
-import sqlite3 from 'sqlite3';
-import { fileURLToPath } from 'url';
-import path from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+ const express = require('express');
+const sqlite3 = require('sqlite3').verbose();
+const cors = require('cors');
+const path = require('path');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
+// Configurações para ler dados e aceitar conexões
+app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
 
-// Conexão com o Banco de Dados SQLite
+// AQUI ESTÁ O AJUSTE: Diz ao servidor para procurar as páginas (index e admin) soltas na pasta principal
+app.use(express.static(path.join(__dirname, '.')));
+
+// Conectar ao banco de dados definitivo (arquivo banco_aryart.db)
 const db = new sqlite3.Database('./banco_aryart.db', (err) => {
-    if (err) console.error('Erro ao abrir banco:', err.message);
-    else console.log('Banco de dados SQLite Conectado!');
+    if (err) {
+        console.error("Erro ao abrir o banco de dados:", err.message);
+    } else {
+        console.log("Banco de dados SQLite Conectado com sucesso!");
+        criarTabelas();
+    }
 });
 
-// Criação automática de todas as tabelas necessárias do catálogo
-db.serialize(() => {
-    // 1. Tabela para guardar o WhatsApp de atendimento e os títulos da loja
-    db.run(`CREATE TABLE IF NOT EXISTS configuracoes (
-        id INTEGER PRIMARY KEY,
-        whatsapp TEXT,
-        titulo TEXT,
-        subtitulo TEXT
-    )`);
-
-    // 2. Tabela para salvar as Abas/Categorias dinâmicas
-    db.run(`CREATE TABLE IF NOT EXISTS abas (
+// Criando as gavetas do banco de dados se elas não existirem
+function criarTabelas() {
+    db.run(`CREATE TABLE IF NOT EXISTS categorias (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT UNIQUE
+        nome TEXT NOT NULL UNIQUE
     )`);
 
-    // 3. Tabela para salvar os Produtos do catálogo com até 6 fotos
     db.run(`CREATE TABLE IF NOT EXISTS produtos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT,
-        aba TEXT,
-        preco REAL,
-        imgs TEXT
+        nome TEXT NOT NULL,
+        preco REAL NOT NULL,
+        categoria_id INTEGER,
+        imagens TEXT,
+        descricao TEXT,
+        FOREIGN KEY (categoria_id) REFERENCES categorias(id)
     )`);
+}
 
-    // Configuração inicial padrão para o site não iniciar em branco no primeiro acesso
-    db.get("SELECT COUNT(*) as qtd FROM configuracoes", [], (err, row) => {
-        if (row && row.qtd === 0) {
-            db.run("INSERT INTO configuracoes (id, whatsapp, titulo, subtitulo) VALUES (1, '5511977534671', 'Ary Art', 'Seu catálogo de sublimação.')");
-        }
-    });
-});
+// --- ROTAS DO SISTEMA (Comunicação com o Painel Admin e Vitrine) ---
 
-// --- ROTAS DA API PARA CONFIGURAÇÕES GERAIS ---
-app.get('/api/config', (req, res) => {
-    db.get("SELECT * FROM configuracoes WHERE id = 1", [], (err, row) => {
-        res.json(row || { whatsapp: '5511977534671', titulo: 'Ary Art', subtitulo: 'Seu catálogo de sublimação.' });
-    });
-});
-
-app.post('/api/config', (req, res) => {
-    const { whatsapp, titulo, subtitulo } = req.body;
-    db.run("UPDATE configuracoes SET whatsapp = ?, titulo = ?, subtitulo = ? WHERE id = 1", [whatsapp, titulo, subtitulo], function(err) {
+// 1. Buscar todas as categorias/abas
+app.get('/api/categorias', (req, res) => {
+    db.all("SELECT * FROM categorias", [], (err, rows) => {
         if (err) return res.status(500).json({ erro: err.message });
-        res.json({ sucesso: true });
+        res.json(rows);
     });
 });
 
-// --- ROTAS DA API FOR GERENCIAR AS ABAS (CATEGORIAS) ---
+// 2. Rota extra de segurança para abas
 app.get('/api/abas', (req, res) => {
-    db.all("SELECT nome FROM abas", [], (err, rows) => {
+    db.all("SELECT * FROM categorias", [], (err, rows) => {
         if (err) return res.status(500).json({ erro: err.message });
-        let lista = [];
-        if (rows) rows.forEach(r => lista.push(r.nome));
-        res.json(lista);
+        res.json(rows);
     });
 });
 
-app.post('/api/abas', (req, res) => {
+// 3. Salvar uma nova categoria/aba
+app.post('/api/categorias', (req, res) => {
     const { nome } = req.body;
-    db.run("INSERT OR IGNORE INTO abas (nome) VALUES (?)", [nome], function(err) {
+    db.run("INSERT OR IGNORE INTO categorias (nome) VALUES (?)", [nome], function(err) {
         if (err) return res.status(500).json({ erro: err.message });
-        res.json({ sucesso: true });
+        res.json({ id: this.lastID, nome });
     });
 });
 
-app.delete('/api/abas/:nome', (req, res) => {
-    db.run("DELETE FROM abas WHERE nome = ?", [req.params.nome], function(err) {
-        if (err) return res.status(500).json({ erro: err.message });
-        res.json({ sucesso: true });
-    });
-});
-
-// --- ROTAS DA API PARA GERENCIAR PRODUTOS ---
+// 4. Buscar todos os produtos salvos
 app.get('/api/produtos', (req, res) => {
-    db.all("SELECT * FROM produtos ORDER BY id DESC", [], (err, rows) => {
+    db.all("SELECT * FROM produtos", [], (err, rows) => {
         if (err) return res.status(500).json({ erro: err.message });
-        res.json(rows || []);
+        // Converte o formato do texto de volta para lista de imagens
+        const produtosFormatados = rows.map(p => ({
+            ...p,
+            imagens: JSON.parse(p.imagens || '[]')
+        }));
+        res.json(produtosFormatados);
     });
 });
 
+// 5. Salvar um produto novo no SQLite
 app.post('/api/produtos', (req, res) => {
-    const { nome, aba, preco, imgs } = req.body;
-    db.run("INSERT INTO produtos (nome, aba, preco, imgs) VALUES (?, ?, ?, ?)", [nome, aba, preco, imgs], function(err) {
-        if (err) return res.status(500).json({ erro: err.message });
-        res.json({ sucesso: true, id: this.lastID });
-    });
+    const { nome, preco, categoria_id, imagens, descricao } = req.body;
+    const imagensString = JSON.stringify(imagens || []);
+
+    db.run(
+        "INSERT INTO produtos (nome, preco, categoria_id, imagens, descricao) VALUES (?, ?, ?, ?, ?)",
+        [nome, preco, categoria_id, imagensString, descricao || ""],
+        function(err) {
+            if (err) return res.status(500).json({ erro: err.message });
+            res.json({ id: this.lastID, nome, preco, categoria_id, imagens });
+        }
+    );
 });
 
-app.delete('/api/produtos/:id', (req, res) => {
-    db.run("DELETE FROM produtos WHERE id = ?", [req.params.id], function(err) {
-        if (err) return res.status(500).json({ erro: err.message });
-        res.json({ sucesso: true });
-    });
-});
+console.log("SISTEMA ARY ART ATUALIZADO COM SUCESSO!");
 
-// LIGA O SERVIDOR (Porta adaptada para rodar no seu PC ou na Internet automaticamente)
-const PORTA = process.env.PORT || 3000;
-app.listen(PORTA, '0.0.0.0', () => {
-    console.log('\n======================================');
-    console.log('SISTEMA ARY ART ATUALIZADO COM SUCESSO!');
-    console.log(`Servidor rodando em: http://localhost:${PORTA}`);
-    console.log('======================================\n');
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
 });
