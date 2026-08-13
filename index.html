@@ -33,6 +33,8 @@
         .produto-info .preco { font-size: 18px; font-weight: bold; color: #ff7300; margin-bottom: 15px; }
         .btn-carrinho { display: block; background-color: #0056b3; color: white; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; width: 100%; }
         .btn-carrinho:hover { background-color: #ff7300; }
+        .btn-pagar { display: block; background-color: #3483fa; color: white; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; width: 100%; text-decoration: none; margin-top: 8px; box-sizing: border-box; }
+        .btn-pagar:hover { background-color: #2968c8; }
     </style>
 </head>
 <body>
@@ -142,7 +144,6 @@
         <p>Passe o mouse ou toque nas abas para abrir as subcategorias.</p>
     </div>
 
-    <!-- CONTAINER DA VITRINE ADICIONADO AQUI -->
     <div class="vitrine" id="vitrine"></div>
 
     <script>
@@ -159,7 +160,6 @@
         }
 
         function filtrarProdutos(categoria, subcategoria, elementoClicado) {
-            // Atualiza visualmente qual botão está ativo
             document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
             if(elementoClicado) elementoClicado.classList.add('active');
 
@@ -185,15 +185,19 @@
             lista.forEach((p, index) => {
                 let imagens = [];
                 try {
-                    // Tenta ler o formato novo (JSON com Base64)
                     imagens = JSON.parse(p.imagens);
                 } catch(e) {
-                    // Fallback caso ainda exista algum produto muito antigo com link simples
                     if(p.imagens) imagens = [p.imagens];
                 }
                 
                 if(!Array.isArray(imagens) || imagens.length === 0) {
                     imagens = ['https://via.placeholder.com/240x220?text=Sem+Foto'];
+                }
+
+                // Botão de pagamento do Mercado Livre (só aparece se o produto tiver link)
+                let botaoPagamento = '';
+                if (p.link_pagamento) {
+                    botaoPagamento = '<a class="btn-pagar" href="' + p.link_pagamento + '" target="_blank">💳 Comprar no Mercado Livre</a>';
                 }
 
                 const card = document.createElement('div');
@@ -221,6 +225,7 @@
                         <h3>${p.nome}</h3>
                         <div class="preco">R$ ${parseFloat(p.preco).toFixed(2)}</div>
                         <button class="btn-carrinho" onclick="adicionarCarrinho(${p.id})">Adicionar</button>
+                        ${botaoPagamento}
                     </div>
                 `;
                 vitrine.appendChild(card);
@@ -228,7 +233,7 @@
         }
 
         function mudarFoto(indexCard, direction, event) {
-            event.stopPropagation(); // Evita que o clique na seta feche o submenu
+            event.stopPropagation();
             const container = document.getElementById(`carrossel-${indexCard}`);
             const imgs = container.querySelectorAll('img');
             let activeIndex = 0;
@@ -247,7 +252,6 @@
         
         function adicionarCarrinho(id) {
             alert('Produto adicionado! (Integração com carrinho pendente)');
-            // Aqui entraria a lógica do seu carrinho
         }
 
         window.onload = carregarProdutos;
