@@ -1,92 +1,198 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ary Art - Finalizar Pedido</title>
     <style>
-        html, body { min-height: 100%; margin: 0; padding: 20px 0; display: flex; justify-content: center; align-items: center; background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; box-sizing: border-box; }
-        .container { background-color: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 550px; box-sizing: border-box; border-top: 5px solid #0056b3; }
-        .logo-container { text-align: center; margin-bottom: 20px; }
-        .logo-container img { max-width: 100px; height: auto; }
-        h2 { margin-top: 0; text-align: center; color: #1a1e21; font-size: 22px; }
-        .sub-paginas { display: flex; justify-content: space-around; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
-        .sub-paginas a { font-size: 13px; color: #0056b3; text-decoration: none; font-weight: bold; }
-        .sub-paginas a:hover { color: #ff7300; text-decoration: underline; }
-        label { font-weight: 600; display: block; margin-top: 15px; color: #333; font-size: 14px; }
-        input, textarea, button { width: 100%; padding: 12px; margin-top: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-        input:focus, textarea:focus { border-color: #0056b3; outline: none; box-shadow: 0 0 5px rgba(0, 86, 179, 0.2); }
-        .carrinho-lista { background-color: #f8f9fa; border: 1px solid #e3e6ea; border-radius: 6px; padding: 15px; margin-top: 10px; }
-        .carrinho-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 14px; }
-        .carrinho-item:last-child { border-bottom: none; }
-        .total-box { text-align: right; font-weight: bold; font-size: 16px; color: #ff7300; margin-top: 15px; padding-top: 10px; border-top: 2px solid #ccc; }
-        .btn-mini { background-color: #dc3545; color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; width: auto; margin: 0; }
-        .btn-mini:hover { background-color: #bd2130; }
-        button[type="submit"] { background-color: #0056b3; color: white; border: none; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 25px; transition: background 0.3s; }
-        button[type="submit"]:hover { background-color: #ff7300; }
-        .aviso { background-color: #fff3cd; color: #856404; padding: 15px; border: 1px solid #ff7300; border-radius: 6px; margin-top: 20px; font-weight: bold; text-align: center; font-size: 13px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f6f9; color: #1a1e21; }
+        header { background-color: #ffffff; padding: 20px; text-align: center; border-bottom: 4px solid #0056b3; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        header h1 { margin: 0; font-size: 24px; color: #0056b3; }
+        .container { max-width: 650px; margin: 30px auto; padding: 0 20px; }
+        .box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #eee; }
+        h2 { color: #1a1e21; margin-top: 0; border-bottom: 2px solid #ff7300; padding-bottom: 8px; font-size: 18px; }
+        
+        /* Estilos do Carrinho */
+        .item-carrinho { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .item-carrinho:last-child { border-bottom: none; }
+        .item-info { flex: 1; }
+        .item-nome { font-weight: bold; color: #333; }
+        .item-preco { color: #666; font-size: 14px; }
+        .item-controles { display: flex; align-items: center; gap: 8px; }
+        .btn-qtd { background-color: #1a1e21; color: white; border: none; width: 28px; height: 28px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+        .btn-qtd:hover { background-color: #ff7300; }
+        .qtd-num { font-weight: bold; min-width: 20px; text-align: center; }
+        .btn-remover { background-color: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-remover:hover { background-color: #bd2130; }
+        
+        .total-box { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee; color: #0056b3; }
+        
+        /* Estilos do Formulário */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        input:focus, select:focus, textarea:focus { border-color: #0056b3; outline: none; }
+        
+        .btn-enviar { background-color: #25d366; color: white; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; transition: background 0.3s; margin-top: 10px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
+        .btn-enviar:hover { background-color: #20ba5a; }
+        .btn-voltar { display: block; text-align: center; color: #0056b3; text-decoration: none; font-weight: bold; margin-top: 15px; font-size: 14px; }
+        .btn-voltar:hover { color: #ff7300; }
+        .carrinho-vazio { text-align: center; color: #999; font-style: italic; padding: 20px 0; }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Ary Art - Finalizar seu Pedido</h1>
+    </header>
+    
     <div class="container">
-        <div class="logo-container"><img src="images/logo.png" alt="Ary Art Logo" onerror="this.style.display='none'"></div>
-        <div class="sub-paginas"><a href="index.html">🏠 Voltar a Comprar</a></div>
-        <h2>🛒 Resumo e Fechamento do Pedido</h2>
-        <div class="carrinho-lista">
-            <div id="itens-carrinho-tela"></div>
-            <div class="total-box" id="total-carrinho-tela">Total: R$ 0,00</div>
+        <!-- Resumo do Carrinho Modificável -->
+        <div class="box">
+            <h2>🛒 Itens do seu Pedido</h2>
+            <div id="lista-checkout"></div>
+            <div class="total-box">
+                <span>Valor Total:</span>
+                <span id="valor-total">R$ 0,00</span>
+            </div>
         </div>
-        <form id="formulario-pedido">
-            <label for="nome-cliente">Nome Completo:</label><input type="text" id="nome-cliente" required placeholder="Digite seu nome">
-            <label for="cpf-cliente">CPF:</label><input type="text" id="cpf-cliente" required placeholder="000.000.000-00">
-            <label for="nasc-cliente">Data de Nascimento:</label><input type="date" id="nasc-cliente" required>
-            <label for="celular-cliente">Celular / WhatsApp:</label><input type="tel" id="celular-cliente" required placeholder="(00) 99999-9999">
-            <label for="email-cliente">E-mail:</label><input type="email" id="email-cliente" required placeholder="seuemail@exemplo.com">
-            <label for="endereco-cliente">Endereço de Entrega Completo:</label><input type="text" id="endereco-cliente" required placeholder="Rua, número, bairro, cidade e CEP">
-            <label for="arte-cliente">Envie sua Arte (Opcional):</label><input type="file" id="arte-cliente" accept="image/*,.pdf,.cdr,.ai">
-            <label for="detalhes-pedido">Explique detalhadamente o que você quer:</label><textarea id="detalhes-pedido" rows="4" required placeholder="Cores, nomes, frases ou detalhes da personalização..."></textarea>
-            <button type="submit">Enviar Pedido Completo para o WhatsApp</button>
-        </form>
-        <div id="mensagem-sucesso" class="aviso" style="display: none;">✅ Pedido enviado! Sua arte será avaliada após a confirmação do pagamento.</div>
+
+        <!-- Formulário de Dados de Entrega -->
+        <div class="box">
+            <h2>📝 Dados de Envio e Contato</h2>
+            <form id="form-pedido">
+                <div class="form-group">
+                    <label for="cli-nome">Nome Completo:</label>
+                    <input type="text" id="cli-nome" required placeholder="Digite seu nome">
+                </div>
+                <div class="form-group">
+                    <label for="cli-cpf">CPF:</label>
+                    <input type="text" id="cli-cpf" required placeholder="000.000.000-00">
+                </div>
+                <div class="form-group">
+                    <label for="cli-nasc">Data de Nascimento:</label>
+                    <input type="date" id="cli-nasc" required>
+                </div>
+                <div class="form-group">
+                    <label for="cli-celular">Celular / WhatsApp:</label>
+                    <input type="tel" id="cli-celular" required placeholder="(00) 99999-9999">
+                </div>
+                <div class="form-group">
+                    <label for="cli-email">E-mail:</label>
+                    <input type="email" id="cli-email" required placeholder="seuemail@exemplo.com">
+                </div>
+                <div class="form-group">
+                    <label for="cli-endereco">Endereço Completo de Entrega:</label>
+                    <textarea id="cli-endereco" rows="3" required placeholder="Rua, Número, Bairro, Cidade, CEP..."></textarea>
+                </div>
+                <button type="submit" class="btn-enviar">📱 Enviar Pedido via WhatsApp</button>
+            </form>
+            <a href="index.html" class="btn-voltar">⬅️ Continuar Comprando</a>
+        </div>
     </div>
 
     <script>
+        // Carrega os itens salvos do localStorage
         let carrinho = JSON.parse(localStorage.getItem('carrinho_itens')) || [];
-        let valorTotalGeral = 0;
-        let whatsappDestino = "5511977534671";
+        // Defina aqui o seu WhatsApp com o código do país (55) + DDD + Número
+        const WHATSAPP_LOJA = "5511999999999"; 
 
-        window.onload = async function() {
+        window.onload = function() {
             renderizarCarrinho();
-            let r = await fetch('/api/config'), d = await r.json();
-            if(d && d.whatsapp) whatsappDestino = d.whatsapp;
         }
 
         function renderizarCarrinho() {
-            let container = document.getElementById('itens-carrinho-tela'), totalTela = document.getElementById('total-carrinho-tela');
-            container.innerHTML = ""; valorTotalGeral = 0;
-            if(carrinho.length === 0) { container.innerHTML = `<p style="text-align:center; color:#999; margin: 10px 0;">Seu carrinho está vazio!</p>`; totalTela.innerText = "Total: R$ 0,00"; return; }
+            let container = document.getElementById('lista-checkout');
+            let totalExibir = document.getElementById('valor-total');
+            container.innerHTML = "";
+
+            if (carrinho.length === 0) {
+                container.innerHTML = `<p class="carrinho-vazio">Seu carrinho está vazio. Volte à vitrine para escolher produtos.</p>`;
+                totalExibir.innerText = "R$ 0,00";
+                return;
+            }
+
+            let totalGeral = 0;
+
             carrinho.forEach((item, index) => {
-                let sub = item.preco * item.quantidade; valorTotalGeral += sub;
-                let div = document.createElement('div'); div.className = "carrinho-item";
-                div.innerHTML = `<span><b>${item.nome}</b> (x${item.quantidade})</span><span>R$ ${sub.toFixed(2)} <button class="btn-mini" onclick="removerItem(${index})">❌</button></span>`;
+                let qtd = item.quantidade || 1;
+                let subtotal = item.preco * qtd;
+                totalGeral += subtotal;
+
+                let div = document.createElement('div');
+                div.className = "item-carrinho";
+                div.innerHTML = `
+                    <div class="item-info">
+                        <div class="item-nome">${item.nome}</div>
+                        <div class="item-preco">R$ ${item.preco.toFixed(2)} cada</div>
+                    </div>
+                    <div class="item-controles">
+                        <button class="btn-qtd" onclick="alterarQuantidade(${index}, -1)">-</button>
+                        <span class="qtd-num">${qtd}</span>
+                        <button class="btn-qtd" onclick="alterarQuantidade(${index}, 1)">+</button>
+                        <button class="btn-remover" onclick="removerItem(${index})">🗑️</button>
+                    </div>
+                `;
                 container.appendChild(div);
             });
-            totalTela.innerText = `Total: R$ ${valorTotalGeral.toFixed(2)}`;
+
+            totalExibir.innerText = `R$ ${totalGeral.toFixed(2).replace('.', ',')}`;
         }
 
-        function removerItem(index) { carrinho.splice(index, 1); localStorage.setItem('carrinho_itens', JSON.stringify(carrinho)); renderizarCarrinho(); }
+        function alterarQuantidade(index, mudanca) {
+            carrinho[index].quantidade = (carrinho[index].quantidade || 1) + mudanca;
+            
+            // Se a quantidade chegar a 0, remove o item automaticamente
+            if (carrinho[index].quantidade <= 0) {
+                carrinho.splice(index, 1);
+            }
+            
+            salvarEAtualizar();
+        }
 
-        document.getElementById('formulario-pedido').addEventListener('submit', function(evento) {
-            evento.preventDefault();
-            if(carrinho.length === 0) { alert("Seu carrinho está vazio!"); return; }
-            let n = document.getElementById('nome-cliente').value, c = document.getElementById('cpf-cliente').value, nasc = document.getElementById('nasc-cliente').value;
-            let cel = document.getElementById('celular-cliente').value, em = document.getElementById('email-cliente').value, end = document.getElementById('endereco-cliente').value, det = document.getElementById('detalhes-pedido').value;
-            let txtCarrinho = ""; carrinho.forEach(i => { txtCarrinho += `• ${i.nome} (Qtd: ${i.quantidade}) - R$ ${(i.preco * i.quantidade).toFixed(2)}\n`; });
-            let msg = `Olá Ary Art! Novo pedido MULTI-ITENS:\n\n📋 *DADOS DO CLIENTE:*\n👤 *Nome:* ${n}\n🆔 *CPF:* ${c}\n📅 *Nascimento:* ${nasc.split('-').reverse().join('/')}\n📱 *Celular:* ${cel}\n📧 *E-mail:* ${em}\n📍 *Endereço:* ${end}\n\n🛒 *ITENS:*\n${txtCarrinho}\n💰 *TOTAL:* R$ ${valorTotalGeral.toFixed(2)}\n\n📝 *Detalhes:* ${det}\n\n⚠️ _Arte avaliada após confirmação do pagamento._`;
-            document.getElementById('mensagem-sucesso').style.display = 'block';
-            localStorage.removeItem('carrinho_itens');
-            setTimeout(() => { window.location.href = "https://wa.me" + whatsappDestino + "?text=" + encodeURIComponent(msg); }, 2000);
-        });
-    </script>
-</body>
-</html>
+        function removerItem(index) {
+            carrinho.splice(index, 1);
+            salvarEAtualizar();
+        }
+
+        function salvarEAtualizar() {
+            localStorage.setItem('carrinho_itens', JSON.stringify(carrinho));
+            renderizarCarrinho();
+        }
+
+        // Configuração do Envio para o WhatsApp
+        document.getElementById('form-pedido').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (carrinho.length === 0) {
+                alert("Adicione pelo menos um produto ao carrinho antes de enviar!");
+                return;
+            }
+
+            // Pega os dados do formulário
+            let nome = document.getElementById('cli-nome').value;
+            let cpf = document.getElementById('cli-cpf').value;
+            let dataNascInput = document.getElementById('cli-nasc').value; // YYYY-MM-DD
+            let celular = document.getElementById('cli-celular').value;
+            let email = document.getElementById('cli-email').value;
+            let endereco = document.getElementById('cli-endereco').value;
+
+            // Converte a data de nascimento para o formato BR (DD/MM/AAAA)
+            let dataBr = dataNascInput.split('-').reverse().join('/');
+
+            // Monta o resumo dos produtos comprados
+            let textoProdutos = "";
+            let totalGeral = 0;
+            carrinho.forEach(item => {
+                let qtd = item.quantidade || 1;
+                let subtotal = item.preco * qtd;
+                totalGeral += subtotal;
+                textoProdutos += `• ${item.nome} (Qtd: ${qtd}) - R$ ${subtotal.toFixed(2)}\n`;
+            });
+
+            // Estrutura a mensagem completa para o WhatsApp
+            let mensagemCompleta = `Olá, Ary Art! Gostaria de fechar este pedido:\n\n`;
+            mensagemCompleta += `🛒 *PRODUTOS CORRER:* \n${textoProdutos}\n`;
+            mensagemCompleta += `💰 *TOTAL DO PEDIDO:* R$ ${totalGeral.toFixed(2)}\n\n`;
+            mensagemCompleta += `👤 *DADOS DO CLIENTE:* \n`;
+            mensagemCompleta += `• Nome: ${nome}\n`;
+            mensagemCompleta += `• CPF: ${cpf}\n`;
