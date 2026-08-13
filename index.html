@@ -1,189 +1,38 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ary Art - Catálogo de Sublimação</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f6f9; color: #1a1e21; }
-        header { background-color: #ffffff; padding: 20px; text-align: center; border-bottom: 4px solid #0056b3; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; }
-        header h1 { margin: 0; font-size: 28px; color: #0056b3; }
-        .carrinho-topo { position: absolute; right: 30px; top: 22px; background-color: #ff7300; color: white; padding: 10px 15px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 4px 10px rgba(255, 115, 0, 0.3); }
-        
-        /* Menu Dropdown */
-        nav { background-color: #1a1e21; text-align: center; padding: 0; position: sticky; top: 0; z-index: 1000; display: flex; justify-content: center; flex-wrap: wrap; }
-        .menu-item { position: relative; display: inline-block; }
-        nav a { color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px; padding: 15px 20px; display: inline-block; cursor: pointer; transition: background 0.3s; }
-        nav a:hover, nav a.active { background-color: #ff7300; color: white; }
-        
-        .submenu-conteudo { display: none; position: absolute; background-color: #ffffff; min-width: 180px; box-shadow: 0px 8px 16px rgba(0,0,0,0.15); z-index: 1001; border-top: 3px solid #ff7300; text-align: left; }
-        .submenu-conteudo a { color: #333333; padding: 12px 16px; text-decoration: none; display: block; font-size: 13px; border-bottom: 1px solid #eee; width: calc(100% - 32px); }
-        .submenu-conteudo a:hover { background-color: #f4f6f9; color: #ff7300; }
-        .menu-item:hover .submenu-conteudo { display: block; }
-        
-        .intro-container { max-width: 800px; margin: 30px auto; padding: 0 20px; text-align: center; }
-        .vitrine { max-width: 1000px; margin: 20px auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; padding: 20px; }
-        .produto-card { background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #eee; }
-        .carrossel-container { position: relative; width: 100%; height: 220px; background-color: #ffffff; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .carrossel-container img { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
-        .carrossel-container img.active { display: block; }
-        .seta-carrossel { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; padding: 8px 12px; cursor: pointer; font-weight: bold; border-radius: 4px; }
-        .seta-esq { left: 5px; } .seta-dir { right: 5px; }
-        .produto-info { padding: 15px; text-align: center; }
-        .produto-info h3 { margin: 0 0 10px 0; font-size: 16px; color: #333; }
-        .produto-info .preco { font-size: 18px; font-weight: bold; color: #ff7300; margin-bottom: 15px; }
-        .btn-carrinho { display: block; background-color: #0056b3; color: white; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; width: 100%; }
-        .btn-carrinho:hover { background-color: #ff7300; }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>Ary Art</h1>
-        <a href="cadastro.html" class="carrinho-topo" id="contador-carrinho">🛒 Carrinho (0)</a>
-    </header>
+function mostrarProdutos(categoriaId, subcategoriaId) {
+    let vitrine = document.getElementById('vitrine-produtos'); vitrine.innerHTML = "";
+    let filtrados = produtosSalvos || [];
     
-    <!-- MENU FIXADO DIRETAMENTE NO HTML - SEM RISCO DE ERRO DE LEITURA -->
-    <nav id="menu-navegacao">
-        <div class="menu-item"><a onclick="filtrarProdutos('Todos', 'Todos')" class="active" id="btn-todos">✨ Ver Todos</a></div>
+    if (categoriaId !== "Todos") filtrados = filtrados.filter(p => p.categoria_id == categoriaId);
+    if (subcategoriaId !== "Todos") filtrados = filtrados.filter(p => p.subcategoria_id == subcategoriaId);
+
+    if(filtrados.length === 0) {
+        vitrine.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#999; font-style:italic; padding: 40px 0;">Nenhum produto cadastrado aqui.</p>`;
+        return;
+    }
+
+    filtrados.forEach((prod, pIdx) => {
+        let card = document.createElement('div'); card.className = "produto-card";
         
-        <!-- Bags -->
-        <div class="menu-item">
-            <a onclick="filtrarProdutos(1, 'Todos')">Bags</a>
-            <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos(1, 1)">• Times</a>
-                <a onclick="filtrarProdutos(1, 2)">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos(1, 3)">• Profissões</a>
-                <a onclick="filtrarProdutos(1, 4)">• Diversas</a>
-                <a onclick="filtrarProdutos(1, 5)">• Novidades</a>
-            </div>
-        </div>
+        // CORREÇÃO INFALÍVEL: Transforma o texto do banco em fotos reais separadas por vírgula
+        let imagens = [];
+        let dadosImagens = prod.imagens || prod.imgs;
 
-        <!-- Chinelos -->
-        <div class="menu-item">
-            <a onclick="filtrarProdutos(2, 'Todos')">Chinelos</a>
-            <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos(2, 1)">• Times</a>
-                <a onclick="filtrarProdutos(2, 2)">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos(2, 3)">• Profissões</a>
-                <a onclick="filtrarProdutos(2, 4)">• Diversas</a>
-                <a onclick="filtrarProdutos(2, 5)">• Novidades</a>
-            </div>
-        </div>
-
-        <!-- Lembrancinhas -->
-        <div class="menu-item">
-            <a onclick="filtrarProdutos(3, 'Todos')">Lembrancinhas</a>
-            <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos(3, 1)">• Times</a>
-                <a onclick="filtrarProdutos(3, 2)">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos(3, 3)">• Profissões</a>
-                <a onclick="filtrarProdutos(3, 4)">• Diversas</a>
-                <a onclick="filtrarProdutos(3, 5)">• Novidades</a>
-            </div>
-        </div>
-
-        <!-- Azulejos -->
-        <div class="menu-item">
-            <a onclick="filtrarProdutos(4, 'Todos')">Azulejos</a>
-            <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos(4, 1)">• Times</a>
-                <a onclick="filtrarProdutos(4, 2)">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos(4, 3)">• Profissões</a>
-                <a onclick="filtrarProdutos(4, 4)">• Diversas</a>
-                <a onclick="filtrarProdutos(4, 5)">• Novidades</a>
-            </div>
-        </div>
-
-        <!-- Canecas -->
-        <div class="menu-item">
-            <a onclick="filtrarProdutos(5, 'Todos')">Canecas</a>
-            <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos(5, 1)">• Times</a>
-                <a onclick="filtrarProdutos(5, 2)">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos(5, 3)">• Profissões</a>
-                <a onclick="filtrarProdutos(5, 4)">• Diversas</a>
-                <a onclick="filtrarProdutos(5, 5)">• Novidades</a>
-            </div>
-        </div>
-
-        <!-- Camisetas -->
-        <div class="menu-item">
-            <a onclick="filtrarProdutos(6, 'Todos')">Camisetas</a>
-            <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos(6, 1)">• Times</a>
-                <a onclick="filtrarProdutos(6, 2)">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos(6, 3)">• Profissões</a>
-                <a onclick="filtrarProdutos(6, 4)">• Diversas</a>
-                <a onclick="filtrarProdutos(6, 5)">• Novidades</a>
-            </div>
-        </div>
-
-        <!-- Almofadas -->
-        <div class="menu-item">
-            <a onclick="filtrarProdutos(7, 'Todos')">Almofadas</a>
-            <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos(7, 1)">• Times</a>
-                <a onclick="filtrarProdutos(7, 2)">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos(7, 3)">• Profissões</a>
-                <a onclick="filtrarProdutos(7, 4)">• Diversas</a>
-                <a onclick="filtrarProdutos(7, 5)">• Novidades</a>
-            </div>
-        </div>
-
-        <!-- Chaveiros -->
-        <div class="menu-item">
-            <a onclick="filtrarProdutos(8, 'Todos')">Chaveiros</a>
-            <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos(8, 1)">• Times</a>
-                <a onclick="filtrarProdutos(8, 2)">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos(8, 3)">• Profissões</a>
-                <a onclick="filtrarProdutos(8, 4)">• Diversas</a>
-                <a onclick="filtrarProdutos(8, 5)">• Novidades</a>
-            </div>
-        </div>
-
-        <!-- Outros -->
-        <div class="menu-item">
-            <a onclick="filtrarProdutos(9, 'Todos')">Outros</a>
-            <div class="submenu-conteudo">
-                <a onclick="filtrarProdutos(9, 1)">• Times</a>
-                <a onclick="filtrarProdutos(9, 2)">• Datas Comemorativas</a>
-                <a onclick="filtrarProdutos(9, 3)">• Profissões</a>
-                <a onclick="filtrarProdutos(9, 4)">• Diversas</a>
-                <a onclick="filtrarProdutos(9, 5)">• Novidades</a>
-            </div>
-        </div>
-
-        <div class="menu-item"><a href="admin.html">⚙️ Admin</a></div>
-    </nav>
-
-    <div class="intro-container">
-        <h2>Bem-vindo ao nosso Catálogo Virtual</h2>
-        <p>Passe o mouse ou toque nas abas para abrir as subcategorias.</p>
-    </div>
-    <div class="vitrine" id="vitrine-produtos"></div>
-
-    <script>
-        let produtosSalvos = [];
-        let carrinho = JSON.parse(localStorage.getItem('carrinho_itens')) || [];
-
-        window.onload = function() {
-            carregarProdutosVitrine();
-            atualizarContador();
-        }
-
-        function removerAtivos() { 
-            document.querySelectorAll('nav a').forEach(l => l.classList.remove("active")); 
-            document.getElementById('btn-todos').classList.remove("active");
-        }
-
-        async function carregarProdutosVitrine() {
-            try { 
-                let r = await fetch('/api/produtos'); 
-                produtosSalvos = await r.json(); 
-            } catch (e) {
-                console.log("Erro ao carregar do servidor.");
+        if (dadosImagens) {
+            if (Array.isArray(dadosImagens)) {
+                imagens = dadosImagens;
+            } else if (typeof dadosImagens === 'string') {
+                imagens = dadosImagens.split(',').map(i => i.trim()).filter(i => i !== "");
             }
-            filtrarProdutos("Todos", "Todos");
+        }
+        
+        if (imagens.length === 0) {
+            imagens = ['https://unsplash.com'];
         }
 
+        let tagsImagens = imagens.map((img, iIdx) => `<img src="${img}" class="img-carrossel-${pIdx} ${iIdx === 0 ? 'active' : ''}">`).join('');
+        let setas = imagens.length > 1 ? `<button class="seta-carrossel seta-esq" onclick="mudarFoto(${pIdx}, -1, ${imagens.length})">❮</button><button class="seta-carrossel seta-dir" onclick="mudarFoto(${pIdx}, 1, ${imagens.length})">❯</button>` : '';
+
+        card.innerHTML = `<div class="carrossel-container">${tagsImagens}${setas}</div><div class="produto-info"><h3>${prod.nome}</h3><div class="preco">R$ ${parseFloat(prod.preco).toFixed(2)}</div><button class="btn-carrinho" onclick="addCarrinho('${prod.nome}', ${prod.preco})">🛒 Adicionar ao Carrinho</button></div>`;
+        vitrine.appendChild(card);
+    });
+}
