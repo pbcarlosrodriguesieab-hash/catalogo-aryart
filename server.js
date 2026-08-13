@@ -1,4 +1,3 @@
-```javascript
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
@@ -23,18 +22,9 @@ const db = new sqlite3.Database(caminhoBanco, (err) => {
 });
 
 function criarTabelas() {
-    db.run(`CREATE TABLE IF NOT EXISTS produtos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT NOT NULL,
-        preco REAL NOT NULL,
-        categoria_id INTEGER,
-        subcategoria_id INTEGER,
-        imagens TEXT,
-        descricao TEXT
-    )`);
+    db.run("CREATE TABLE IF NOT EXISTS produtos (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, preco REAL NOT NULL, categoria_id INTEGER, subcategoria_id INTEGER, imagens TEXT, descricao TEXT)");
 }
 
-// ROTAS SIMPLIFICADAS DA API
 app.get('/api/produtos', (req, res) => {
     db.all("SELECT * FROM produtos", [], (err, rows) => {
         if (err) return res.status(500).json({ erro: err.message });
