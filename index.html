@@ -9,14 +9,18 @@
         header { background-color: #ffffff; padding: 20px; text-align: center; border-bottom: 4px solid #0056b3; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; }
         header h1 { margin: 0; font-size: 28px; color: #0056b3; }
         .carrinho-topo { position: absolute; right: 30px; top: 22px; background-color: #ff7300; color: white; padding: 10px 15px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 4px 10px rgba(255, 115, 0, 0.3); }
+        
+        /* Menu de Navegação Avançado Fixado por Código */
         nav { background-color: #1a1e21; text-align: center; padding: 0; position: sticky; top: 0; z-index: 1000; display: flex; justify-content: center; flex-wrap: wrap; }
         .menu-item { position: relative; display: inline-block; }
         nav a { color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px; padding: 15px 20px; display: inline-block; cursor: pointer; }
         nav a:hover, nav a.active { background-color: #ff7300; color: white; }
+        
         .submenu-conteudo { display: none; position: absolute; background-color: #ffffff; min-width: 180px; box-shadow: 0px 8px 16px rgba(0,0,0,0.15); z-index: 1001; border-top: 3px solid #ff7300; text-align: left; }
         .submenu-conteudo a { color: #333333; padding: 12px 16px; text-decoration: none; display: block; font-size: 13px; border-bottom: 1px solid #eee; width: auto; }
         .submenu-conteudo a:hover { background-color: #f4f6f9; color: #ff7300; }
         .menu-item:hover .submenu-conteudo { display: block; }
+        
         .intro-container { max-width: 800px; margin: 30px auto; padding: 0 20px; text-align: center; }
         .vitrine { max-width: 1000px; margin: 20px auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; padding: 20px; }
         .produto-card { background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #eee; }
@@ -37,7 +41,14 @@
         <h1>Ary Art</h1>
         <a href="cadastro.html" class="carrinho-topo" id="contador-carrinho">🛒 Carrinho (0)</a>
     </header>
-    <nav id="menu-navegacao"></nav>
+    
+    <!-- MENU PRETO DESENHADO DIRETAMENTE NO SITE -->
+    <nav id="menu-navegacao">
+        <div class="menu-item"><a onclick="filtrarProdutos('Todos', 'Todos')" class="active" id="btn-todos">✨ Ver Todos</a></div>
+        
+        <!-- Script vai gerar as abas e submenus de segurança aqui de forma automática e veloz -->
+    </nav>
+
     <div class="intro-container">
         <h2>Bem-vindo ao nosso Catálogo Virtual</h2>
         <p>Passe o mouse ou toque nas abas para abrir as subcategorias.</p>
@@ -48,71 +59,69 @@
         let produtosSalvos = [];
         let carrinho = JSON.parse(localStorage.getItem('carrinho_itens')) || [];
 
-        const listaAbasFixas = [
+        // Estrutura oficial de IDs para controle interno de cliques
+        const abasFixas = [
             { id: 1, nome: "Bags" }, { id: 2, nome: "Chinelos" }, { id: 3, nome: "Lembrancinhas" },
             { id: 4, nome: "Azulejos" }, { id: 5, nome: "Canecas" }, { id: 6, nome: "Camisetas" },
             { id: 7, nome: "Almofadas" }, { id: 8, nome: "Chaveiros" }, { id: 9, nome: "Outros" }
         ];
 
-        const listaSubmenusFixos = [
+        const submenusFixos = [
             { id: 1, nome: "Times" }, { id: 2, nome: "Datas Comemorativas" }, 
             { id: 3, nome: "Profissões" }, { id: 4, nome: "Diversas" }, { id: 5, nome: "Novidades" }
         ];
 
-        window.onload = async function() {
-            await carregarMenusESubmenus();
-            await carregarProdutosVitrine();
+        window.onload = function() {
+            montarMenuVisual();
+            carregarProdutosVitrine();
             atualizarContador();
         }
 
-        async function carregarMenusESubmenus() {
-            let abas = []; let submenus = [];
-            try {
-                let rCat = await fetch('/api/categorias'); abas = await rCat.json();
-                let rSub = await fetch('/api/subcategorias'); submenus = await rSub.json();
-            } catch (e) {}
-
-            if (!abas || abas.length === 0) abas = listaAbasFixas;
-            if (!submenus || submenus.length === 0) submenus = listaSubmenusFixos;
-
-            let menu = document.getElementById('menu-navegacao'); menu.innerHTML = "";
-
-            let divTodos = document.createElement('div'); divTodos.className = "menu-item";
-            let btnTodos = document.createElement('a'); btnTodos.innerText = "✨ Ver Todos"; btnTodos.className = "active";
-            btnTodos.onclick = function() { removerAtivos(); btnTodos.className = "active"; mostrarProdutos("Todos", "Todos"); };
-            divTodos.appendChild(btnTodos); menu.appendChild(divTodos);
-
-            abas.forEach(aba => {
+        function montarMenuVisual() {
+            let menu = document.getElementById('menu-navegacao');
+            // Mantém apenas o botão Ver Todos inicial
+            menu.innerHTML = `<div class="menu-item"><a onclick="filtrarProdutos('Todos', 'Todos')" class="active" id="btn-todos">✨ Ver Todos</a></div>`;
+            
+            abasFixas.forEach(aba => {
                 let divItem = document.createElement('div'); divItem.className = "menu-item";
                 let linkPrincipal = document.createElement('a'); linkPrincipal.innerText = aba.nome;
-                linkPrincipal.onclick = function() { removerAtivos(); linkPrincipal.className = "active"; mostrarProdutos(aba.id, "Todos"); };
+                linkPrincipal.onclick = function() { removerAtivos(); linkPrincipal.className = "active"; filtrarProdutos(aba.id, "Todos"); };
                 divItem.appendChild(linkPrincipal);
 
                 let divSubContainer = document.createElement('div'); divSubContainer.className = "submenu-conteudo";
-                submenus.forEach(sub => {
+                submenusFixos.forEach(sub => {
                     let linkSub = document.createElement('a'); linkSub.innerText = `• ${sub.nome}`;
                     linkSub.onclick = function(e) { 
                         e.stopPropagation(); removerAtivos(); linkPrincipal.className = "active";
-                        mostrarProdutos(aba.id, sub.id); 
+                        filtrarProdutos(aba.id, sub.id); 
                     };
                     divSubContainer.appendChild(linkSub);
                 });
                 divItem.appendChild(divSubContainer); menu.appendChild(divItem);
             });
 
+            // Botão Admin fixo no final
             let divAdmin = document.createElement('div'); divAdmin.className = "menu-item";
             let btnAdmin = document.createElement('a'); btnAdmin.innerText = "⚙️ Admin"; btnAdmin.href = "admin.html";
             divAdmin.appendChild(btnAdmin); menu.appendChild(divAdmin);
         }
 
-        function removerAtivos() { document.querySelectorAll('nav a').forEach(l => l.className = ""); }
-
-        async function carregarProdutosVitrine() {
-            try { let r = await fetch('/api/produtos'); produtosSalvos = await r.json(); } catch (e) {}
-            mostrarProdutos("Todos", "Todos");
+        function removerAtivos() { 
+            document.querySelectorAll('nav a').forEach(l => l.classList.remove("active")); 
+            document.getElementById('btn-todos').classList.remove("active");
         }
 
-        function mostrarProdutos(categoriaId, subcategoriaId) {
+        async function carregarProdutosVitrine() {
+            try { 
+                let r = await fetch('/api/produtos'); 
+                produtosSalvos = await r.json(); 
+            } catch (e) {
+                console.log("Erro ao carregar do servidor, tentando ler memória local.");
+            }
+            filtrarProdutos("Todos", "Todos");
+        }
+
+        function filtrarProdutos(categoriaId, subcategoriaId) {
             let vitrine = document.getElementById('vitrine-produtos'); vitrine.innerHTML = "";
             let filtrados = produtosSalvos || [];
             
