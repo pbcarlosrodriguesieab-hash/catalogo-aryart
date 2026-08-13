@@ -1,4 +1,4 @@
- const express = require('express');
+const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const path = require('path');
@@ -7,7 +7,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-// AUMENTO DE LIMITE PARA ACEITAR IMAGENS EM BASE64
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, '.')));
@@ -32,7 +31,10 @@ function criarTabelas() {
         subcategoria_id TEXT NOT NULL,
         imagens TEXT,
         descricao TEXT
-    )`);
+    )`, function() {
+        // Adiciona a coluna nova de link de pagamento (sem apagar os produtos antigos)
+        db.run("ALTER TABLE produtos ADD COLUMN link_pagamento TEXT", () => {});
+    });
 }
 
 app.get('/api/produtos', (req, res) => {
@@ -43,14 +45,14 @@ app.get('/api/produtos', (req, res) => {
 });
 
 app.post('/api/produtos', (req, res) => {
-    const { nome, preco, categoria_id, subcategoria_id, imagens } = req.body;
+    const { nome, preco, categoria_id, subcategoria_id, imagens, link_pagamento } = req.body;
 
     db.run(
-        "INSERT INTO produtos (nome, preco, categoria_id, subcategoria_id, imagens, descricao) VALUES (?, ?, ?, ?, ?, ?)",
-        [nome, preco, categoria_id, subcategoria_id, imagens || "[]", ""],
+        "INSERT INTO produtos (nome, preco, categoria_id, subcategoria_id, imagens, descricao, link_pagamento) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [nome, preco, categoria_id, subcategoria_id, imagens || "[]", "", link_pagamento || ""],
         function(err) {
             if (err) return res.status(500).json({ erro: err.message });
-            res.json({ id: this.lastID, nome, preco, categoria_id, subcategoria_id, imagens });
+            res.json({ id: this.lastID });
         }
     );
 });
