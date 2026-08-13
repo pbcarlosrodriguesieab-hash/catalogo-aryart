@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -8,43 +8,33 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f6f9; color: #1a1e21; }
         header { background-color: #ffffff; padding: 20px; text-align: center; border-bottom: 4px solid #0056b3; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; }
         header h1 { margin: 0; font-size: 28px; color: #0056b3; }
-        .carrinho-topo { position: absolute; right: 30px; top: 22px; background-color: #ff7300; color: white; padding: 10px 15px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 4px 10px rgba(255, 115, 0, 0.3); transition: transform 0.2s; }
-        .carrinho-topo:hover { transform: scale(1.05); }
-        
-        /* Menu de Navegação Avançado com Submenus (Dropdown) */
+        .carrinho-topo { position: absolute; right: 30px; top: 22px; background-color: #ff7300; color: white; padding: 10px 15px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 4px 10px rgba(255, 115, 0, 0.3); }
         nav { background-color: #1a1e21; text-align: center; padding: 0; position: sticky; top: 0; z-index: 1000; display: flex; justify-content: center; flex-wrap: wrap; }
         .menu-item { position: relative; display: inline-block; }
-        nav a { color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px; padding: 15px 20px; display: inline-block; cursor: pointer; transition: background 0.3s; }
+        nav a { color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px; padding: 15px 20px; display: inline-block; cursor: pointer; }
         nav a:hover, nav a.active { background-color: #ff7300; color: white; }
-        
-        /* Caixa do Submenu Oculto */
         .submenu-conteudo { display: none; position: absolute; background-color: #ffffff; min-width: 180px; box-shadow: 0px 8px 16px rgba(0,0,0,0.15); z-index: 1001; border-top: 3px solid #ff7300; text-align: left; }
         .submenu-conteudo a { color: #333333; padding: 12px 16px; text-decoration: none; display: block; font-size: 13px; border-bottom: 1px solid #eee; width: auto; }
-        .submenu-conteudo a:last-child { border-bottom: none; }
         .submenu-conteudo a:hover { background-color: #f4f6f9; color: #ff7300; }
-        
-        /* Mostrar submenu ao passar o mouse */
         .menu-item:hover .submenu-conteudo { display: block; }
-        
         .intro-container { max-width: 800px; margin: 30px auto; padding: 0 20px; text-align: center; }
-        .intro-container h2 { font-size: 24px; color: #1a1e21; }
         .vitrine { max-width: 1000px; margin: 20px auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; padding: 20px; }
         .produto-card { background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #eee; }
         .carrossel-container { position: relative; width: 100%; height: 220px; background-color: #ffffff; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .carrossel-container img { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
         .carrossel-container img.active { display: block; }
-        .seta-carrossel { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; padding: 8px 12px; cursor: pointer; font-weight: bold; font-size: 14px; border-radius: 4px; }
+        .seta-carrossel { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; padding: 8px 12px; cursor: pointer; font-weight: bold; border-radius: 4px; }
         .seta-esq { left: 5px; } .seta-dir { right: 5px; }
         .produto-info { padding: 15px; text-align: center; }
         .produto-info h3 { margin: 0 0 10px 0; font-size: 16px; color: #333; }
         .produto-info .preco { font-size: 18px; font-weight: bold; color: #ff7300; margin-bottom: 15px; }
-        .btn-carrinho { display: block; background-color: #0056b3; color: white; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; border: none; width: 100%; transition: background 0.3s; }
+        .btn-carrinho { display: block; background-color: #0056b3; color: white; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; width: 100%; }
         .btn-carrinho:hover { background-color: #ff7300; }
     </style>
 </head>
 <body>
     <header>
-        <h1 id="txt-titulo-loja">Ary Art</h1>
+        <h1>Ary Art</h1>
         <a href="cadastro.html" class="carrinho-topo" id="contador-carrinho">🛒 Carrinho (0)</a>
     </header>
     <nav id="menu-navegacao"></nav>
@@ -58,7 +48,6 @@
         let produtosSalvos = [];
         let carrinho = JSON.parse(localStorage.getItem('carrinho_itens')) || [];
 
-        // ESTRUTURA FIXA DE SEGURANÇA (Se o banco falhar, o site usa esta lista)
         const listaAbasFixas = [
             { id: 1, nome: "Bags" }, { id: 2, nome: "Chinelos" }, { id: 3, nome: "Lembrancinhas" },
             { id: 4, nome: "Azulejos" }, { id: 5, nome: "Canecas" }, { id: 6, nome: "Camisetas" },
@@ -77,30 +66,22 @@
         }
 
         async function carregarMenusESubmenus() {
-            let abas = [];
-            let submenus = [];
-            
+            let abas = []; let submenus = [];
             try {
                 let rCat = await fetch('/api/categorias'); abas = await rCat.json();
                 let rSub = await fetch('/api/subcategorias'); submenus = await rSub.json();
-            } catch (error) {
-                console.log("Usando menus de segurança da vitrine.");
-            }
+            } catch (e) {}
 
-            // Se o servidor retornar vazio por conta do reset, força a lista fixa aparecer
             if (!abas || abas.length === 0) abas = listaAbasFixas;
             if (!submenus || submenus.length === 0) submenus = listaSubmenusFixos;
 
-            let menu = document.getElementById('menu-navegacao');
-            menu.innerHTML = "";
+            let menu = document.getElementById('menu-navegacao'); menu.innerHTML = "";
 
-            // Botão Ver Todos
             let divTodos = document.createElement('div'); divTodos.className = "menu-item";
             let btnTodos = document.createElement('a'); btnTodos.innerText = "✨ Ver Todos"; btnTodos.className = "active";
             btnTodos.onclick = function() { removerAtivos(); btnTodos.className = "active"; mostrarProdutos("Todos", "Todos"); };
             divTodos.appendChild(btnTodos); menu.appendChild(divTodos);
 
-            // Monta as abas principais com efeito Dropdown flutuante
             abas.forEach(aba => {
                 let divItem = document.createElement('div'); divItem.className = "menu-item";
                 let linkPrincipal = document.createElement('a'); linkPrincipal.innerText = aba.nome;
@@ -119,7 +100,6 @@
                 divItem.appendChild(divSubContainer); menu.appendChild(divItem);
             });
 
-            // Botão do Painel Admin no final
             let divAdmin = document.createElement('div'); divAdmin.className = "menu-item";
             let btnAdmin = document.createElement('a'); btnAdmin.innerText = "⚙️ Admin"; btnAdmin.href = "admin.html";
             divAdmin.appendChild(btnAdmin); menu.appendChild(divAdmin);
@@ -128,12 +108,7 @@
         function removerAtivos() { document.querySelectorAll('nav a').forEach(l => l.className = ""); }
 
         async function carregarProdutosVitrine() {
-            try {
-                let r = await fetch('/api/produtos');
-                produtosSalvos = await r.json();
-            } catch (e) {
-                produtosSalvos = [];
-            }
+            try { let r = await fetch('/api/produtos'); produtosSalvos = await r.json(); } catch (e) {}
             mostrarProdutos("Todos", "Todos");
         }
 
@@ -145,14 +120,13 @@
             if (subcategoriaId !== "Todos") filtrados = filtrados.filter(p => p.subcategoria_id == subcategoriaId);
 
             if(filtrados.length === 0) {
-                vitrine.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#999; font-style:italic; padding: 40px 0;">Nenhum produto cadastrado aqui ainda.</p>`;
+                vitrine.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#999; font-style:italic; padding: 40px 0;">Nenhum produto cadastrado aqui.</p>`;
                 return;
             }
 
             filtrados.forEach((prod, pIdx) => {
                 let card = document.createElement('div'); card.className = "produto-card";
-                let imagens = [];
-                let dadosImagens = prod.imagens || prod.imgs;
+                let imagens = []; let dadosImagens = prod.imagens || prod.imgs;
 
                 if (dadosImagens) {
                     if (Array.isArray(dadosImagens)) imagens = dadosImagens;
@@ -162,3 +136,13 @@
                 }
                 if (imagens.length === 0 || imagens === "") imagens = ['https://unsplash.com'];
 
+                let tagsImagens = imagens.map((img, iIdx) => `<img src="${img}" class="img-carrossel-${pIdx} ${iIdx === 0 ? 'active' : ''}" onerror="this.src='https://unsplash.com'">`).join('');
+                let setas = imagens.length > 1 ? `<button class="seta-carrossel seta-esq" onclick="mudarFoto(${pIdx}, -1, ${imagens.length})">❮</button><button class="seta-carrossel seta-dir" onclick="mudarFoto(${pIdx}, 1, ${imagens.length})">❯</button>` : '';
+
+                card.innerHTML = `<div class="carrossel-container">${tagsImagens}${setas}</div><div class="produto-info"><h3>${prod.nome}</h3><div class="preco">R$ ${parseFloat(prod.preco).toFixed(2)}</div><button class="btn-carrinho" onclick="addCarrinho('${prod.nome}', ${prod.preco})">🛒 Adicionar ao Carrinho</button></div>`;
+                vitrine.appendChild(card);
+            });
+        }
+
+        function mudarFoto(pIdx, dir, total) {
+            let imgs = document.querySelectorAll(`.img-carrossel-${pIdx}`); let ativo = 0;
