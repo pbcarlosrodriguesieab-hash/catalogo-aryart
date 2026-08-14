@@ -23,6 +23,7 @@
   .arquivo-info { font-size:12px; color:#155724; width:100%; }
   .sucesso { display:none; background:#d4edda; color:#155724; padding:20px; border-radius:12px; text-align:center; font-weight:bold; margin-bottom:20px; }
   .link-pagar { display:block; background:#3483fa; color:#fff; text-decoration:none; padding:10px; border-radius:6px; margin-top:8px; font-weight:bold; text-align:center; }
+  .link-whats { display:block; background:#25d366; color:#fff; text-decoration:none; padding:12px; border-radius:6px; margin-top:12px; font-weight:bold; text-align:center; font-size:16px; }
 </style>
 </head>
 <body>
@@ -45,6 +46,7 @@
   </div>
 </div>
 <script>
+const WHATS_LOJA = '5511977534671';
 let carrinho = JSON.parse(localStorage.getItem('carrinho') || '[]');
 let arquivos = {};
 
@@ -109,12 +111,27 @@ async function finalizarPedido() {
   });
   if (!r.ok) { alert('Erro ao enviar o pedido. Tente novamente.'); return; }
 
+  // Monta a mensagem do WhatsApp com o resumo do pedido
+  let msg = 'Olá! Acabei de fazer um pedido no catálogo Ary Art.\n\n';
+  msg += 'Cliente: ' + nome + '\n';
+  msg += 'Contato: ' + contato + '\n\n';
+  itens.forEach(i => {
+    msg += '• ' + i.qtd + 'x ' + i.nome + ' - R$ ' + (parseFloat(i.preco) * i.qtd).toFixed(2);
+    if (i.arquivo) msg += ' (enviou arquivo — baixar no painel admin)';
+    msg += '\n';
+  });
+  msg += '\nTotal: R$ ' + total.toFixed(2);
+  const obs = document.getElementById('cli-obs').value.trim();
+  if (obs) msg += '\nObs: ' + obs;
+
   localStorage.removeItem('carrinho');
   carrinho = [];
-  let html = '✅ Pedido enviado com sucesso!<br>O vendedor entrará em contato pelo WhatsApp informado.';
+
+  let html = '✅ Pedido enviado com sucesso!<br>Clique abaixo para confirmar pelo WhatsApp:';
+  html += '<a class="link-whats" href="https://wa.me/' + WHATS_LOJA + '?text=' + encodeURIComponent(msg) + '" target="_blank">💬 Confirmar pelo WhatsApp</a>';
   const comLink = itens.filter(i => i.link_pagamento);
   if (comLink.length) {
-    html += '<br><br><b>Pagamento pelo Mercado Livre:</b>';
+    html += '<br><b>Pagamento pelo Mercado Livre:</b>';
     comLink.forEach(i => { html += '<a class="link-pagar" href="' + i.link_pagamento + '" target="_blank">💳 Pagar: ' + i.nome + '</a>'; });
   }
   document.getElementById('conteudo').style.display = 'none';
