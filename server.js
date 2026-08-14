@@ -62,6 +62,20 @@ app.post('/api/produtos', async (req, res) => {
     }
 });
 
+// ===== NOVA ROTA: EDITAR PRODUTO =====
+app.put('/api/produtos/:id', async (req, res) => {
+    const { nome, preco, categoria_id, subcategoria_id, imagens, link_pagamento } = req.body;
+    try {
+        await db.execute({
+            sql: "UPDATE produtos SET nome = ?, preco = ?, categoria_id = ?, subcategoria_id = ?, imagens = ?, link_pagamento = ? WHERE id = ?",
+            args: [nome, preco, categoria_id, subcategoria_id, imagens || "[]", link_pagamento || "", req.params.id]
+        });
+        res.json({ mensagem: "Atualizado" });
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
+});
+
 app.delete('/api/produtos/:id', async (req, res) => {
     try {
         await db.execute({ sql: "DELETE FROM produtos WHERE id = ?", args: [req.params.id] });
@@ -71,7 +85,6 @@ app.delete('/api/produtos/:id', async (req, res) => {
     }
 });
 
-// ===== ROTAS DE PEDIDOS =====
 app.get('/api/pedidos', async (req, res) => {
     try {
         const result = await db.execute("SELECT * FROM pedidos ORDER BY id DESC");
