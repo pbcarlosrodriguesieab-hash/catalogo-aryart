@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -119,21 +119,52 @@
         let imagensBase64 = [];
         let listaProdutos = [];
 
+        // Comprime a foto antes de enviar (fica leve e carrega rápido no celular)
+        function comprimirImagem(file, callback) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX = 900;
+                    let w = img.width, h = img.height;
+                    if (w > MAX || h > MAX) {
+                        const fator = Math.min(MAX / w, MAX / h);
+                        w = Math.round(w * fator);
+                        h = Math.round(h * fator);
+                    }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.drawImage(img, 0, 0, w, h);
+                    callback(canvas.toDataURL('image/jpeg', 0.8));
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
         document.getElementById('prod-img').addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
             imagensBase64 = [];
             const preview = document.getElementById('preview-imagens');
-            preview.innerHTML = '';
-            
+            preview.innerHTML = '<p style="font-size:12px; color:#666;">Processando fotos...</p>';
+
+            let processadas = 0;
             files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    imagensBase64.push(event.target.result);
-                    const img = document.createElement('img');
-                    img.src = event.target.result;
-                    preview.appendChild(img);
-                };
-                reader.readAsDataURL(file);
+                comprimirImagem(file, function(base64) {
+                    imagensBase64.push(base64);
+                    processadas++;
+                    if (processadas === files.length) {
+                        preview.innerHTML = '';
+                        imagensBase64.forEach(src => {
+                            const img = document.createElement('img');
+                            img.src = src;
+                            preview.appendChild(img);
+                        });
+                    }
+                });
             });
         });
 
