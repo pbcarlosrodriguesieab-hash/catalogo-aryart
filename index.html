@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -35,6 +35,8 @@
         .btn-carrinho:hover { background-color: #ff7300; }
         .btn-pagar { display: block; background-color: #3483fa; color: white; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; width: 100%; text-decoration: none; margin-top: 8px; box-sizing: border-box; }
         .btn-pagar:hover { background-color: #2968c8; }
+        .whats-flutuante { position: fixed; bottom: 20px; right: 20px; background-color: #25d366; color: white; width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1500; }
+        .whats-flutuante:hover { transform: scale(1.08); }
     </style>
 </head>
 <body>
@@ -146,6 +148,8 @@
 
     <div class="vitrine" id="vitrine"></div>
 
+    <a class="whats-flutuante" href="https://wa.me/5511977534671?text=Ol%C3%A1!%20Vim%20pelo%20cat%C3%A1logo%20da%20Ary%20Art%20e%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es." target="_blank" title="Fale conosco no WhatsApp">💬</a>
+
     <script>
         let todosProdutos = [];
         let carrinho = JSON.parse(localStorage.getItem('carrinho') || '[]');
@@ -250,7 +254,6 @@
             imgs[newIndex].classList.add('active');
         }
 
-        // ===== CARRINHO DE COMPRAS =====
         function atualizarContador() {
             const totalItens = carrinho.reduce((soma, i) => soma + i.qtd, 0);
             document.getElementById('contador-carrinho').textContent = '🛒 Carrinho (' + totalItens + ')';
