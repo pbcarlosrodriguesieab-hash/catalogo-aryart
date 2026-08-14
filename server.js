@@ -1,4 +1,4 @@
- const express = require('express');
+const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { createClient } = require('@libsql/client');
@@ -11,10 +11,10 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, '.')));
 
-// Banco de dados NA NUVEM (Turso) - não apaga quando o Render reinicia
+// O .trim() limpa espaços e quebras de linha escondidas
 const db = createClient({
-    url: process.env.TURSO_DATABASE_URL,
-    authToken: process.env.TURSO_AUTH_TOKEN
+    url: (process.env.TURSO_DATABASE_URL || "").trim(),
+    authToken: (process.env.TURSO_AUTH_TOKEN || "").trim()
 });
 
 async function iniciarBanco() {
