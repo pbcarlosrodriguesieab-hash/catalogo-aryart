@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -148,6 +148,7 @@
 
     <script>
         let todosProdutos = [];
+        let carrinho = JSON.parse(localStorage.getItem('carrinho') || '[]');
 
         async function carregarProdutos() {
             try {
@@ -194,7 +195,6 @@
                     imagens = ['https://via.placeholder.com/240x220?text=Sem+Foto'];
                 }
 
-                // Botão de pagamento do Mercado Livre (só aparece se o produto tiver link)
                 let botaoPagamento = '';
                 if (p.link_pagamento) {
                     botaoPagamento = '<a class="btn-pagar" href="' + p.link_pagamento + '" target="_blank">💳 Comprar no Mercado Livre</a>';
@@ -249,12 +249,26 @@
             
             imgs[newIndex].classList.add('active');
         }
-        
-        function adicionarCarrinho(id) {
-            alert('Produto adicionado! (Integração com carrinho pendente)');
+
+        // ===== CARRINHO DE COMPRAS =====
+        function atualizarContador() {
+            const totalItens = carrinho.reduce((soma, i) => soma + i.qtd, 0);
+            document.getElementById('contador-carrinho').textContent = '🛒 Carrinho (' + totalItens + ')';
         }
 
-        window.onload = carregarProdutos;
+        function adicionarCarrinho(id) {
+            const p = todosProdutos.find(x => x.id === id);
+            if (!p) return;
+            const item = carrinho.find(i => i.id === id);
+            if (item) { item.qtd++; } else {
+                carrinho.push({ id: p.id, nome: p.nome, preco: p.preco, qtd: 1, link_pagamento: p.link_pagamento || '' });
+            }
+            localStorage.setItem('carrinho', JSON.stringify(carrinho));
+            atualizarContador();
+            alert('🛒 ' + p.nome + ' adicionado ao carrinho!');
+        }
+
+        window.onload = function() { atualizarContador(); carregarProdutos(); };
     </script>
 </body>
 </html>
