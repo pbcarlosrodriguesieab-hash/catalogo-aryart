@@ -22,8 +22,10 @@
         .btn-danger:hover { background-color: #b02a37; }
         .btn-ver { background-color: #17a2b8; width: auto; padding: 6px 12px; font-size: 13px; border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; }
         .btn-ver:hover { background-color: #117888; }
+        .btn-editar { background-color: #28a745; width: auto; padding: 6px 12px; font-size: 13px; border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; }
+        .btn-editar:hover { background-color: #1e7e34; }
         .alerta { background-color: #d4edda; color: #155724; padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; font-weight: bold; display: none; }
-        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; gap: 10px; }
+        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; gap: 10px; flex-wrap: wrap; }
         #preview-imagens { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
         #preview-imagens img { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 2px solid #ddd; }
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 2000; justify-content: center; align-items: center; }
@@ -39,6 +41,10 @@
         .modal-acoes .btn-danger { padding: 8px 16px; font-size: 14px; }
         .btn-neutro { background-color: #6c757d; width: auto; padding: 8px 16px; font-size: 14px; }
         .btn-neutro:hover { background-color: #5a6268; }
+        #modal-edicao-fotos { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin-bottom: 10px; }
+        #modal-edicao-fotos img { width: 100%; height: 110px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; }
+        .foto-edicao { position: relative; }
+        .foto-remover { position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; font-weight: bold; font-size: 12px; padding: 0; }
     </style>
 </head>
 <body>
@@ -107,6 +113,7 @@
         </div>
     </div>
 
+    <!-- TELA DE VISUALIZAÇÃO -->
     <div id="modal-produto" class="modal-overlay">
         <div class="modal-box">
             <span class="modal-fechar" onclick="fecharModal()">&times;</span>
@@ -120,9 +127,55 @@
         </div>
     </div>
 
+    <!-- TELA DE EDIÇÃO -->
+    <div id="modal-edicao" class="modal-overlay">
+        <div class="modal-box">
+            <span class="modal-fechar" onclick="fecharEdicao()">&times;</span>
+            <h2>✏️ Editar Produto</h2>
+            <div class="form-group"><label>Nome do Produto:</label><input type="text" id="ed-nome"></div>
+            <div class="form-group">
+                <label>Aba Principal:</label>
+                <select id="ed-aba">
+                    <option value="Bags">Bags</option>
+                    <option value="Chinelos">Chinelos</option>
+                    <option value="Lembrancinhas">Lembrancinhas</option>
+                    <option value="Azulejos">Azulejos</option>
+                    <option value="Canecas">Canecas</option>
+                    <option value="Camisetas">Camisetas</option>
+                    <option value="Almofadas">Almofadas</option>
+                    <option value="Chaveiros">Chaveiros</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Subcategoria:</label>
+                <select id="ed-submenu">
+                    <option value="Times">Times</option>
+                    <option value="Datas Comemorativas">Datas Comemorativas</option>
+                    <option value="Profissões">Profissões</option>
+                    <option value="Diversas">Diversas</option>
+                    <option value="Novidades">Novidades</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Preço (R$):</label><input type="text" id="ed-preco"></div>
+            <div class="form-group"><label>💳 Link de Pagamento (opcional):</label><input type="text" id="ed-link"></div>
+            <div class="form-group">
+                <label>📸 Fotos (use o ❌ para remover uma foto):</label>
+                <div id="modal-edicao-fotos"></div>
+                <input type="file" id="ed-img" accept="image/*" multiple>
+            </div>
+            <div class="modal-acoes">
+                <button class="btn-neutro" onclick="fecharEdicao()">Cancelar</button>
+                <button class="btn-editar" onclick="salvarEdicao()">💾 Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let imagensBase64 = [];
         let listaProdutos = [];
+        let imagensEdicao = [];
+        let produtoEmEdicao = null;
 
         function comprimirImagem(file, callback) {
             const reader = new FileReader();
@@ -217,7 +270,8 @@
                 let d = document.createElement('div'); d.className = "item-lista";
                 d.innerHTML = '<span>🎁 <b>' + p.nome + '</b> - R$ ' + parseFloat(p.preco).toFixed(2) + ' (' + p.categoria_id + ' > ' + p.subcategoria_id + ')' + (p.link_pagamento ? ' 💳' : '') + '</span>' +
                 '<span style="white-space: nowrap;">' +
-                    '<button class="btn-ver" onclick="verProduto(' + p.id + ')">👁️ Ver</button> ' +
+                    '<button class="btn-ver" onclick="verProduto(' + p.id + ')">👁️ Ver</button>' +
+                    '<button class="btn-editar" onclick="editarProduto(' + p.id + ')">✏️ Editar</button>' +
                     '<button class="btn-danger" onclick="excluirProduto(' + p.id + ')">❌ Excluir</button>' +
                 '</span>';
                 lista.appendChild(d);
@@ -261,6 +315,80 @@
                 await cProds();
                 mostrarAviso();
             }
+        }
+
+        // ===== EDIÇÃO DE PRODUTO =====
+        function editarProduto(id) {
+            const p = listaProdutos.find(prod => prod.id === id);
+            if(!p) return;
+            produtoEmEdicao = p.id;
+            document.getElementById('ed-nome').value = p.nome;
+            document.getElementById('ed-aba').value = p.categoria_id;
+            document.getElementById('ed-submenu').value = p.subcategoria_id;
+            document.getElementById('ed-preco').value = parseFloat(p.preco).toFixed(2);
+            document.getElementById('ed-link').value = p.link_pagamento || '';
+            try { imagensEdicao = JSON.parse(p.imagens); } catch(e) { imagensEdicao = p.imagens ? [p.imagens] : []; }
+            if(!Array.isArray(imagensEdicao)) imagensEdicao = [];
+            renderFotosEdicao();
+            document.getElementById('modal-edicao').classList.add('aberto');
+        }
+
+        function renderFotosEdicao() {
+            const div = document.getElementById('modal-edicao-fotos');
+            div.innerHTML = '';
+            if (imagensEdicao.length === 0) {
+                div.innerHTML = '<p style="color:#666; grid-column: 1/-1;">Nenhuma foto. Adicione novas abaixo.</p>';
+                return;
+            }
+            imagensEdicao.forEach((src, i) => {
+                const wrap = document.createElement('div');
+                wrap.className = 'foto-edicao';
+                wrap.innerHTML = '<img src="' + src + '"><button class="foto-remover" onclick="removerFotoEdicao(' + i + ')">❌</button>';
+                div.appendChild(wrap);
+            });
+        }
+
+        function removerFotoEdicao(i) {
+            imagensEdicao.splice(i, 1);
+            renderFotosEdicao();
+        }
+
+        document.getElementById('ed-img').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                comprimirImagem(file, function(base64) {
+                    imagensEdicao.push(base64);
+                    renderFotosEdicao();
+                });
+            });
+            e.target.value = '';
+        });
+
+        async function salvarEdicao() {
+            if (produtoEmEdicao === null) return;
+            const nome = document.getElementById('ed-nome').value.trim();
+            if (!nome) { alert('Digite o nome do produto.'); return; }
+            const p = {
+                nome: nome,
+                categoria_id: document.getElementById('ed-aba').value,
+                subcategoria_id: document.getElementById('ed-submenu').value,
+                preco: parseFloat(document.getElementById('ed-preco').value.replace(',', '.')),
+                link_pagamento: document.getElementById('ed-link').value.trim(),
+                imagens: JSON.stringify(imagensEdicao)
+            };
+            await fetch('/api/produtos/' + produtoEmEdicao, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(p)
+            });
+            fecharEdicao();
+            await cProds();
+            mostrarAviso();
+        }
+
+        function fecharEdicao() {
+            document.getElementById('modal-edicao').classList.remove('aberto');
+            produtoEmEdicao = null;
         }
 
         // ===== PEDIDOS RECEBIDOS =====
